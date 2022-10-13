@@ -8,6 +8,18 @@ export function actionSplice(cutoutWayID, parentWayID) {
 
     var action = function(graph) {
 
+        console.log("detagging");
+
+        // todo: only if tagged
+
+        var way = graph.entity(parentWayID);
+
+        var originalTags = way.tags;
+
+        console.log("original tags were " + originalTags);
+
+        graph = graph.replace(way.update({ tags: [] }));
+
         var sharedNodes = getSharedNodes(graph);
 
         console.log("splitting " + sharedNodes);
@@ -32,6 +44,11 @@ export function actionSplice(cutoutWayID, parentWayID) {
         console.log("deleting temp way");
 
         graph = actionDeleteWay(cutoutWayID)(graph);
+
+        console.log("retagging both new ways");
+
+        graph = reapplyTags(graph, parentWayID, originalTags);
+        graph = reapplyTags(graph, createdWayIds[0], originalTags);
 
         console.log("done");
 
@@ -82,6 +99,18 @@ export function actionSplice(cutoutWayID, parentWayID) {
             console.log("way nodes are now " + way.nodes);
 
             return graph.replace(way);
+        }
+
+
+        function reapplyTags(graph, wayID, originalTags) {
+
+            var copiedTags = {};
+            Object.keys(originalTags).forEach(function(key) { copiedTags[key] = originalTags[key]; });
+            // todo: I must be doing this wrong, but I looked but couldn't find a place were iD clones tags
+
+            graph = graph.replace(graph.entity(wayID).update({ tags: copiedTags }));
+
+            return graph;
         }
     };
 
