@@ -7,6 +7,9 @@ import { actionDeleteWay } from './delete_way';
 export function actionSplice(selectedIDs) {
 
 
+    var _resultingWayIds;
+
+
     var action = function(graph) {
 
         var ways = action.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
@@ -78,6 +81,8 @@ export function actionSplice(selectedIDs) {
         graph = reapplyTags(graph, splitWay2Id, originalTags);
 
         console.log("done");
+
+        _resultingWayIds = [ splitWay1Id, splitWay2Id ];
 
         return graph;
 
@@ -181,8 +186,12 @@ export function actionSplice(selectedIDs) {
     };
 
 
+    action.getResultingWayIds = function () {
+        return _resultingWayIds;
+    }
+
     // Returns a two-element array: the cutout line and parent area
-    action.findCutLineAndArea = function chooseCutoutAndArea(graph, selectedIDs) {
+    action.findCutLineAndArea = function(graph, selectedIDs) {
 
         console.assert(selectedIDs.length === 2);
 

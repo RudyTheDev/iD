@@ -5,6 +5,7 @@ import {actionSplice} from "../actions/splice";
 import {behaviorOperation} from '../behavior/operation';
 import {modeSelect} from '../modes/select';
 
+
 export function operationSplice(context, selectedIDs) {
 
     var _action = getAction();
@@ -24,14 +25,7 @@ export function operationSplice(context, selectedIDs) {
 
         context.validator().validate();
 
-        var resultIDs = selectedIDs.filter(context.hasEntity);
-        if (resultIDs.length > 1) {
-            var interestingIDs = resultIDs.filter(function(id) {
-                return context.entity(id).hasInterestingTags();
-            });
-            if (interestingIDs.length) resultIDs = interestingIDs;
-        }
-        context.enter(modeSelect(context, resultIDs));
+        context.enter(modeSelect(context, _action.getResultingWayIds()));
     };
 
 
