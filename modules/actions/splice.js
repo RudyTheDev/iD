@@ -87,14 +87,14 @@ export function actionSplice(selectedIDs) {
         return graph;
 
 
-        function getSharedNodes(graph, cutoutWayID) {
+        function getSharedNodes(graph, cutLineWayID) {
 
             // todo: learn to fail so we can use this to validate
 
-            var cutoutWay = graph.entity(cutoutWayID);
+            var cutLineWay = graph.entity(cutLineWayID);
 
-            var node1 = cutoutWay.nodes[0];
-            var node2 = cutoutWay.nodes[cutoutWay.nodes.length - 1];
+            var node1 = cutLineWay.nodes[0];
+            var node2 = cutLineWay.nodes[cutLineWay.nodes.length - 1];
 
             return [node1, node2];
         }
@@ -209,14 +209,35 @@ export function actionSplice(selectedIDs) {
 
         var ways = this.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
 
-        var cutoutWay = ways[0];
+        var cutLineWay = ways[0];
         var parentWay = ways[1];
 
-        if (cutoutWay.hasInterestingTags()) return 'not_eligible';
+        if (cutLineWay.hasInterestingTags()) return 'cutline_tagged';
 
-        // todo: cutout line nodes must have no tags and it must not be a relation member
-        // todo: cutout line must not be a relation member
-        // todo: cutout nodes must be inside the parent area
+        if (graph.parentRelations(cutLineWay).length > 0) return 'cutline_in_relation';
+
+        for (var i = 0; i < cutLineWay.nodes.length; i++) {
+
+            var node = graph.entity(cutLineWay.nodes[i]);
+
+            if (node.hasInterestingTags()) return 'cutline_nodes_tagged';
+
+            if (graph.parentRelations(node).length > 0) return 'cutline_nodes_in_relation';
+
+            if (i === 0 || i === cutLineWay.nodes.length - 1) {
+                if (graph.parentWays(node).length > 2) return 'cutline_connected_to_other';
+            } else {
+                if (graph.isShared(node)) {
+                    if (graph.parentWays(node).includes(parentWay)) {
+                        return 'cutline_multiple_connection';
+                    } else {
+                        return 'cutline_connected_to_other';
+                    }
+                }
+            }
+
+            // todo: cutout nodes must be inside the parent area
+        }
 
         return false;
     };

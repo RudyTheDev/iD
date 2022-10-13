@@ -506,6 +506,12 @@ en:
       key: X
       annotation: Spliced area into two.
       not_eligible: Cannot splice the area along the line here.
+      cutline_tagged: Cannot splice using a line which has tagged values.
+      cutline_nodes_tagged: Cannot splice using a line which has nodes that have tagged values.
+      cutline_in_relation: Cannot splice using a line which is a member of a relation.
+      cutline_nodes_in_relation: Cannot splice using a line which has nodes that are a member of a relation.
+      cutline_connected_to_other: Cannot splice using a line which is connected to other ways.
+      cutline_multiple_connection: Cannot splice using a line that connects to its parent area multiple times.
     restriction:
       annotation:
         create: Added a turn restriction
