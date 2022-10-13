@@ -55,7 +55,7 @@ export function operationSplice(context, selectedIDs) {
         if (way1Closed && way2Closed || !way1Closed && !way2Closed) return false;
 
 
-        var ways = _action.chooseCutoutAndArea(context.graph(), selectedIDs); // 0 is cut line and 1 is parent area
+        var ways = _action.findCutLineAndArea(context.graph(), selectedIDs); // 0 is cut line and 1 is parent area
 
         let startNode = ways[0].nodes[0];
         let endNode = ways[0].nodes[ways[0].nodes.length - 1];
