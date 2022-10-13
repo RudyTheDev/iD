@@ -3,10 +3,16 @@ import { actionSplit } from "./split";
 import { actionDeleteWay } from './delete_way';
 
 
-export function actionSplice(cutoutWayID, parentWayID) {
+export function actionSplice(selectedIDs) {
 
 
     var action = function(graph) {
+
+        var ways = action.chooseCutoutAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+
+        var cutoutWayID = ways[0].id;
+        var parentWayID = ways[1].id;
+
 
         console.log("detagging");
 
@@ -20,7 +26,7 @@ export function actionSplice(cutoutWayID, parentWayID) {
 
         graph = graph.replace(way.update({ tags: [] }));
 
-        var sharedNodes = getSharedNodes(graph);
+        var sharedNodes = getSharedNodes(graph, cutoutWayID);
 
         console.log("splitting " + sharedNodes);
 
@@ -53,7 +59,7 @@ export function actionSplice(cutoutWayID, parentWayID) {
         return graph;
 
 
-        function getSharedNodes(graph) {
+        function getSharedNodes(graph, cutoutWayID) {
 
             // todo: learn to fail so we can use this to validate
 
@@ -113,19 +119,33 @@ export function actionSplice(cutoutWayID, parentWayID) {
     };
 
 
+    // Returns a two-element array: the cutout line and parent area
+    action.chooseCutoutAndArea = function chooseCutoutAndArea(graph, selectedIDs) {
+
+        console.assert(selectedIDs.length === 2);
+
+        var entity1 = graph.hasEntity(selectedIDs[0]);
+        var entity2 = graph.hasEntity(selectedIDs[1]);
+
+        if (entity1.isClosed())
+            return [entity2, entity1];
+        else
+            return [entity1, entity2];
+    }
+
+
     action.disabled = function(graph) {
 
-        // todo: cutout line must be unclosed
-        // todo: cutout line must have 2+ nodes
-        // todo: cutout line must be empty - must have no tags and nodes must have no tags and it must not be a relation member
-        // todo: cutout line's starting and ending nodes need to be on (shared with) and only on the parent way
-        // todo: no other cutout line node can be connected to anything
-        // todo: cutout nodes cannot be consecutive nodes in parent way (i.e. cannot be a parent's edge)
+        var ways = this.chooseCutoutAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+
+        var cutoutWay = ways[0];
+        var parentWay = ways[1];
+
+        if (cutoutWay.hasInterestingTags()) return 'not_eligible';
+
+        // todo: cutout line nodes must have no tags and it must not be a relation member
+        // todo: cutout line must not be a relation member
         // todo: cutout nodes must be inside the parent area
-
-        //return 'not_eligible';
-
-        // return actionConnect(nodeIDs).disabled(graph);
 
         return false;
     };
