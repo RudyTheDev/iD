@@ -1,6 +1,6 @@
 import {t} from '../core/localizer';
 
-import {actionSplice} from "../actions/splice";
+import {actionSplice} from '../actions/splice';
 
 import {behaviorOperation} from '../behavior/operation';
 import {modeSelect} from '../modes/select';

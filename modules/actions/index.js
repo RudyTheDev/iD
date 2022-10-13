@@ -32,6 +32,7 @@ export { actionRevert } from './revert';
 export { actionRotate } from './rotate';
 export { actionScale } from './scale';
 export { actionSplit } from './split';
+export { actionSplice } from './splice';
 export { actionStraightenNodes } from './straighten_nodes';
 export { actionStraightenWay } from './straighten_way';
 export { actionUnrestrictTurn } from './unrestrict_turn';

@@ -1,10 +1,14 @@
-import { actionConnect } from './connect';
-import { actionSplit } from "./split";
-import { actionJoin } from "./join";
+import { actionSplit } from './split';
+import { actionJoin } from './join';
 import { actionDeleteWay } from './delete_way';
 
-
-export function actionSplice(selectedIDs) {
+//
+// For testing convenience, accepts an ID to assign to the new way.
+// Normally, this will be undefined and the way will automatically
+// be assigned a new ID.
+// Note that this internally relies on split and join actions,
+// so it is not guaranteed which ids and in what order will be preserved.
+export function actionSplice(selectedIDs, newWayIds) {
 
 
     var _resultingWayIds;
@@ -18,7 +22,7 @@ export function actionSplice(selectedIDs) {
         var parentWayID = ways[1].id;
 
 
-        console.log("detagging");
+        console.log('detagging');
 
         // todo: only if tagged
 
@@ -26,21 +30,21 @@ export function actionSplice(selectedIDs) {
 
         var originalTags = way.tags;
 
-        console.log("original tags were " + originalTags);
+        console.log('original tags were ' + originalTags);
 
         graph = graph.replace(way.update({ tags: [] }));
 
         var sharedNodes = getSharedNodes(graph, cutLineWayID);
 
-        console.log("splitting " + sharedNodes);
+        console.log('splitting ' + sharedNodes);
 
-        var split = actionSplit(sharedNodes)
+        var split = actionSplit(sharedNodes, newWayIds);
 
         graph = split(graph);
 
         var createdWayIds = split.getCreatedWayIDs();
 
-        console.log("split result created way ids " + createdWayIds);
+        console.log('split result created way ids ' + createdWayIds);
 
         console.assert(createdWayIds.length >= 1 && createdWayIds.length <= 2);
 
@@ -49,9 +53,9 @@ export function actionSplice(selectedIDs) {
 
         if (createdWayIds.length === 2) {
             // Because split action is unpredicatable and can create 3 ways even though we gave it 2 points,
-            // we sometimes need to recombine the "double-split" way back into a single way.
+            // we sometimes need to recombine the 'double-split' way back into a single way.
 
-            console.log("combining one of double-split ways from " + parentWayID + ", " + createdWayIds[0] + " and " + createdWayIds[1]);
+            console.log('combining one of double-split ways from ' + parentWayID + ', ' + createdWayIds[0] + ' and ' + createdWayIds[1]);
 
             var recombination = recombine(graph, parentWayID, createdWayIds[0], createdWayIds[1], sharedNodes);
 
@@ -64,23 +68,23 @@ export function actionSplice(selectedIDs) {
             splitWay2Id = createdWayIds[0];
         }
 
-        console.log("final split ways are " + splitWay1Id + " and " + splitWay2Id);
+        console.log('final split ways are ' + splitWay1Id + ' and ' + splitWay2Id);
 
-        console.log("following");
+        console.log('following');
 
         graph = followCutLine(graph, splitWay1Id, cutLineWayID);
         graph = followCutLine(graph, splitWay2Id, cutLineWayID);
 
-        console.log("deleting temp way");
+        console.log('deleting temp way');
 
         graph = actionDeleteWay(cutLineWayID)(graph);
 
-        console.log("retagging both new ways");
+        console.log('retagging both new ways');
 
         graph = reapplyTags(graph, splitWay1Id, originalTags);
         graph = reapplyTags(graph, splitWay2Id, originalTags);
 
-        console.log("done");
+        console.log('done');
 
         _resultingWayIds = [ splitWay1Id, splitWay2Id ];
 
@@ -109,9 +113,9 @@ export function actionSplice(selectedIDs) {
             var way = graph.entity(wayId);
             var followedWay = graph.entity(followedWayId);
 
-            console.log("following " + way + " along " + followedWay);
+            console.log('following ' + way + ' along ' + followedWay);
 
-            console.log("way nodes are " + way.nodes);
+            console.log('way nodes are ' + way.nodes);
 
 
             var appendableNodes = followedWay.nodes;
@@ -120,15 +124,15 @@ export function actionSplice(selectedIDs) {
                 appendableNodes = appendableNodes.reverse();
             }
 
-            console.log("following nodes " + appendableNodes);
+            console.log('following nodes ' + appendableNodes);
 
             for (let i = 1; i < appendableNodes.length; i++) {
                 way = way.addNode(appendableNodes[i]);
 
-                console.log("added " + appendableNodes[i] + " to way and nodes are now " + way.nodes);
+                console.log('added ' + appendableNodes[i] + ' to way and nodes are now ' + way.nodes);
             }
 
-            console.log("way nodes are now " + way.nodes);
+            console.log('way nodes are now ' + way.nodes);
 
             return graph.replace(way);
         }
@@ -175,7 +179,7 @@ export function actionSplice(selectedIDs) {
             var join = actionJoin([ joinableWay1Id, joinableWay2Id ]);
             graph = join(graph);
 
-            var remainingWayId = graph.hasEntity(joinableWay1Id) ? joinableWay1Id : joinableWay2Id
+            var remainingWayId = graph.hasEntity(joinableWay1Id) ? joinableWay1Id : joinableWay2Id;
             // todo: add getting of survivor from join action instead
 
             return {
@@ -188,7 +192,7 @@ export function actionSplice(selectedIDs) {
 
     action.getResultingWayIds = function () {
         return _resultingWayIds;
-    }
+    };
 
     // Returns a two-element array: the cutout line and parent area
     action.findCutLineAndArea = function(graph, selectedIDs) {
@@ -198,11 +202,12 @@ export function actionSplice(selectedIDs) {
         var entity1 = graph.hasEntity(selectedIDs[0]);
         var entity2 = graph.hasEntity(selectedIDs[1]);
 
-        if (entity1.isClosed())
+        if (entity1.isClosed()) {
             return [entity2, entity1];
-        else
+        } else {
             return [entity1, entity2];
-    }
+        }
+    };
 
 
     action.disabled = function(graph) {
