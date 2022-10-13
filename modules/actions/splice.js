@@ -28,13 +28,11 @@ export function actionSplice(cutoutWayID, parentWayID) {
 
         graph = split(graph);
 
-        var createdWayIds = split.getCreatedWayIDs(); // todo: I had to add this function - is there already a way to get it?
+        var createdWayIds = split.getCreatedWayIDs();
 
         console.assert(createdWayIds.length === 1);
 
         console.log("split result created way ids " + createdWayIds);
-
-        // todo: follow temp
 
         console.log("following");
 

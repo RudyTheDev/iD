@@ -500,6 +500,12 @@ en:
           other: "Split {n} features."
       not_eligible: Lines can't be split at their beginning or end.
       connected_to_hidden: This can't be split because it is connected to a hidden feature.
+    splice:
+      title: Splice
+      description: Divide the parent area into two areas along this line.
+      key: X
+      annotation: Spliced area into two.
+      not_eligible: Cannot splice the area along the line here.
     restriction:
       annotation:
         create: Added a turn restriction
