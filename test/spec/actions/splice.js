@@ -97,5 +97,6 @@ describe('iD.actionSplice', function () {
 
         expect(areaShort.nodes).to.include.members(['a', 'b', 'c', 'h']);
         expect(areaLong.nodes).to.include.members(['c', 'd', 'e', 'f', 'g', 'h']);
+        // todo: how do I assert order without caring about the starting element
     });
 });

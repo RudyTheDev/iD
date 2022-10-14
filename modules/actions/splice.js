@@ -91,19 +91,6 @@ export function actionSplice(selectedIDs, newWayIds) {
         return graph;
 
 
-        function getSharedNodes(graph, cutLineWayID) {
-
-            // todo: learn to fail so we can use this to validate
-
-            var cutLineWay = graph.entity(cutLineWayID);
-
-            var node1 = cutLineWay.nodes[0];
-            var node2 = cutLineWay.nodes[cutLineWay.nodes.length - 1];
-
-            return [node1, node2];
-        }
-
-
         function followCutLine(graph, wayId, followedWayId) {
 
             // todo: make this into a separate action?
@@ -190,6 +177,19 @@ export function actionSplice(selectedIDs, newWayIds) {
     };
 
 
+    function getSharedNodes(graph, cutLineWayID) {
+
+        // todo: learn to fail so we can use this to validate
+
+        var cutLineWay = graph.entity(cutLineWayID);
+
+        var node1 = cutLineWay.nodes[0];
+        var node2 = cutLineWay.nodes[cutLineWay.nodes.length - 1];
+
+        return [node1, node2];
+    }
+
+
     action.getResultingWayIds = function () {
         return _resultingWayIds;
     };
@@ -243,6 +243,17 @@ export function actionSplice(selectedIDs, newWayIds) {
 
             // todo: cutout nodes must be inside the parent area
         }
+
+        // At this point, our own checks are good to go,
+        // but we rely on split action internally, so check that we can actually split
+
+        var sharedNodes = getSharedNodes(graph, cutLineWay.id);
+
+        var split = actionSplit(sharedNodes, newWayIds);
+
+        var splitDisabled = split.disabled(graph);
+
+        if (splitDisabled) return 'cannot_split_area';
 
         return false;
     };

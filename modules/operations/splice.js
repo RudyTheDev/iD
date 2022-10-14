@@ -61,8 +61,6 @@ export function operationSplice(context, selectedIDs) {
         // Cut line cannot be an edge of the parent area
         if (ways[0].nodes.length === 2 && ways[1].areAdjacent(startNode, endNode)) return false;
 
-        // todo: cutout line cannot connect to any other way with any nodes and not to parent with any other but start/end
-
         return true;
     };
 
