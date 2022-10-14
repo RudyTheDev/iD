@@ -16,11 +16,27 @@ export function actionSplice(selectedIDs, newWayIds) {
 
     var action = function(graph) {
 
-        var ways = action.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+        var cutLineWayID;
+        var parentWayID;
 
-        var cutLineWayID = ways[0].id;
-        var parentWayID = ways[1].id;
+        if (selectedIDs.length === 2) {
+            // The user has selected both the cutline and an area
 
+            let ways = action.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+
+            cutLineWayID = ways[0].id;
+            parentWayID = ways[1].id;
+
+        } else { // length === 1
+            // The user has selected a cutline that's in an area
+
+            cutLineWayID = selectedIDs[0];
+
+            let cutline = graph.entity(selectedIDs[0]);
+            let startNode = graph.entity(cutline.nodes[0]);
+            let startParents = graph.parentWays(startNode);
+            parentWayID = startParents[0] === cutline ? startParents[1].id: startParents[0].id;
+        }
 
         console.log('detagging');
 
@@ -212,10 +228,28 @@ export function actionSplice(selectedIDs, newWayIds) {
 
     action.disabled = function(graph) {
 
-        var ways = this.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+        var cutLineWay;
+        var parentWay;
 
-        var cutLineWay = ways[0];
-        var parentWay = ways[1];
+        if (selectedIDs.length === 2) {
+            // The user has selected both the cutline and an area
+
+            let ways = action.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+
+            cutLineWay = ways[0];
+            parentWay = ways[1];
+
+        } else { // length === 1
+            // The user has selected a cutline that's in an area
+
+            cutLineWay = graph.entity(selectedIDs[0]);
+
+            let startNode = graph.entity(cutLineWay.nodes[0]);
+            let startParents = graph.parentWays(startNode);
+            parentWay = startParents[0] === cutLineWay ? startParents[1]: startParents[0];
+            // todo: allow multiple as long as one is accepted area
+        }
+
 
         if (cutLineWay.hasInterestingTags()) return 'cutline_tagged';
 
@@ -230,7 +264,7 @@ export function actionSplice(selectedIDs, newWayIds) {
             if (graph.parentRelations(node).length > 0) return 'cutline_nodes_in_relation';
 
             if (i === 0 || i === cutLineWay.nodes.length - 1) {
-                if (graph.parentWays(node).length > 2) return 'cutline_connected_to_other';
+                //if (graph.parentWays(node).length > 2) return 'cutline_connected_to_other';
             } else {
                 if (graph.isShared(node)) {
                     if (graph.parentWays(node).includes(parentWay)) {
