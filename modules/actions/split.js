@@ -258,6 +258,10 @@ export function actionSplit(nodeIds, newWayIds) {
 
         _createdWayIDs.push(wayB.id);
 
+        // TODO:
+        // If the exact ways to be split were given (selected), then the newly-created way should also be a part of it
+        if (_wayIDs) _wayIDs.push(wayB.id);
+
         return graph;
     }
 
