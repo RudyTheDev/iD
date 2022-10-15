@@ -93,6 +93,8 @@ export function operationSplice(context, selectedIDs) {
         var actionDisabled = _action.disabled(context.graph());
         if (actionDisabled) return actionDisabled;
 
+        if (selectedIDs.some(context.hasHiddenConnections)) return 'connected_to_hidden';
+
         return false;
     };
 
