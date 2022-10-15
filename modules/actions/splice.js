@@ -211,16 +211,29 @@ export function actionSplice(selectedIDs, newWayIds) {
         let endNode = graph.entity(cutline.nodes[cutline.nodes.length - 1]);
 
         let startParents = graph.parentWays(startNode);
-        if (startParents.length !== 2) return null;
+        if (startParents.length === 1) return null; // just the cutline
 
         let endParents = graph.parentWays(endNode);
-        if (endParents.length !== 2) return null;
+        if (endParents.length === 1) return null; // just the cutline
 
-        let parent = startParents[0] === cutline ? startParents[1] : startParents[0];
+        // Find a (single) area that the cutline could unambiguously splice
 
-        if (parent !== endParents[0] && parent !== endParents[1]) return null;
+        let parent = null;
 
-        if (!parent.isClosed()) return null;
+        for (let i = 0; i < startParents.length; i++) {
+
+            if (startParents[i] === cutline) continue;
+
+            if (!startParents[i].isClosed()) continue; // ignoring open ways
+
+            if (!endParents.includes(startParents[i])) continue;
+
+            if (parent !== null) return null; // multiple splicable areas - ambiguous
+
+            parent = startParents[i];
+        }
+
+        if (parent === null) return null;
 
         // Cut line cannot be an edge of the parent area
         if (cutline.nodes.length === 2 && parent.areAdjacent(startNode, endNode)) return null;
