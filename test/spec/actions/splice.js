@@ -1,26 +1,284 @@
+// todo: operation #disabled tests since it does a lot of checks
+
 describe('iD.actionSplice', function () {
 
     describe('#disabled', function () {
 
+        // todo: cutline has tags
+        // todo: cutline in relation
+        // todo: cutline node has tags
+        // todo: cutline node in relation
+        // todo: cutline inner connects to area multiple
+        // todo: cutline inner connects to other ways
+        // todo: cutline node outside area
+
     });
 
 
-    it('splices an area', function () {
+    it('splices a square', function () {
         //
         // Situation:
-        //    b ---> c ---> d ---> e
-        //    ^      .             |
-        //    |      v             v
-        //    a <--- h <--- g <--- f
+        //    b ---> c
+        //    ^ \    |
+        //    |    \ |
+        //    a <--- d
+        //
+        //    Area a-b-c-d-a
+        //    Cut line b-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var graph = iD.coreGraph([
+            a, b, c, d,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] })
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+    });
+
+    it('splices with an extra node', function () {
+        //
+        // Situation:
+        //    b ------> c
+        //    ^  \      |
+        //    |    x    |
+        //    |      \  v
+        //    a <------ d
+        //
+        //    Area a-b-c-d-a
+        //    Cut line b-x-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 2] });
+        var c = iD.osmNode({ id: 'c', loc: [2, 2] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+        var x = iD.osmNode({ id: 'x', loc: [1, 1] });
+        var graph = iD.coreGraph([
+            a, b, c, d, x,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'x', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'x', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'x', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'x', 'b']);
+    });
+
+    it('splices when another way terminates at node', function () {
+        //
+        // Situation:
+        //    b ---> c
+        //    ^ \    |
+        //    |    \ |
+        //    a <--- d ---> y
+        //
+        //    Area a-b-c-d-a
+        //    Way d-y
+        //    Cut line b-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var y = iD.osmNode({ id: 'y', loc: [2, 0] });
+        var graph = iD.coreGraph([
+            a, b, c, d, y,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+            iD.osmWay({ id: 'Y', nodes: ['d', 'y'] })
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+    });
+
+    it('splices when another way passes through a node', function () {
+        //
+        // Situation:
+        //    b ---> c
+        //    ^ \    |
+        //    |    \ |
+        //    a <--- d ---> y
+        //           |
+        //           u
+        //
+        //    Area a-b-c-d-a
+        //    Way u-d-y
+        //    Cut line b-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var y = iD.osmNode({ id: 'y', loc: [2, 0] });
+        var u = iD.osmNode({ id: 'u', loc: [1, -1] });
+        var graph = iD.coreGraph([
+            a, b, c, d, y, u,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+            iD.osmWay({ id: 'Y', nodes: ['u', 'd', 'y'] })
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+    });
+
+    it('splices when another area terminates at node', function () {
+        //
+        // Situation:
+        //    b ---> c      u
+        //    ^ \    |    / |
+        //    |    \ |  /   |
+        //    a <--- d ---> y
+        //
+        //    Area a-b-c-d-a
+        //    Area d-y-u-d
+        //    Cut line b-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var y = iD.osmNode({ id: 'y', loc: [2, 0] });
+        var u = iD.osmNode({ id: 'u', loc: [2, 1] });
+        var graph = iD.coreGraph([
+            a, b, c, d, y, u,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+            iD.osmWay({ id: 'Y', nodes: ['d', 'y', 'u', 'd'] })
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+    });
+
+    it('splices when another way connects to both nodes', function () {
+        //
+        // Situation:
+        //    w-------------u
+        //    |             |
+        //    b ---> c      |
+        //    ^ \    |      |
+        //    |    \ |      |
+        //    a <--- d ---> y
+        //
+        //    Area a-b-c-d-a
+        //    Way d-y-u-w-b
+        //    Cut line b-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var y = iD.osmNode({ id: 'y', loc: [2, 0] });
+        var u = iD.osmNode({ id: 'u', loc: [2, 2] });
+        var w = iD.osmNode({ id: 'w', loc: [0, 2] });
+        var graph = iD.coreGraph([
+            a, b, c, d, y, u, w,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+            iD.osmWay({ id: 'Y', nodes: ['d', 'y', 'u', 'w', 'b'] })
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+    });
+
+    it('splices explicitly when another area connects to both nodes', function () {
+        //
+        // Situation:
+        //    w-------------u
+        //    |             |
+        //    b ---> c      |
+        //    ^ \    |      |
+        //    |    \ |      |
+        //    a <--- d ---> y
+        //
+        //    Area a-b-c-d-a
+        //    Area a-b-w-u-y-d-a
+        //    Cut line b-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var y = iD.osmNode({ id: 'y', loc: [2, 0] });
+        var u = iD.osmNode({ id: 'u', loc: [2, 2] });
+        var w = iD.osmNode({ id: 'w', loc: [0, 2] });
+        var graph = iD.coreGraph([
+            a, b, c, d, y, u, w,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+            iD.osmWay({ id: 'Y', nodes: ['a', 'b', 'w', 'u', 'y', 'd', 'a'] })
+        ]);
+
+        graph = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph.hasEntity('cutline')).to.be.undefined;
+        expect(graph.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+    });
+
+    it('splices an area with unnatural split layout', function () {
+        //
+        // Situation:
+        //    b ---> c ---> d ------------------------> e
+        //    ^      .                                  |
+        //    |      v                                  v
+        //    a <--- h <--- g <------------------------ f
         //
         //    Area a-b-c-d-e-f-a
         //    Cut line b-e
         //
         // Expected result:
-        //    b ---> c ---> d ---> e
-        //    ^      |\            |
-        //    |     \|             v
-        //    a <--- h <--- g <--- f
+        //    b ---> c ---> d ------------------------> e
+        //    ^      |\                                 |
+        //    |     \|                                  v
+        //    a <--- h <--- g <------------------------ f
         //
         //    Two areas: a-b-c-h-a and c-d-e-f-g-h
         //    Note that we don't care which area is which
@@ -30,8 +288,8 @@ describe('iD.actionSplice', function () {
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
         var d = iD.osmNode({ id: 'd', loc: [2, 1] });
-        var e = iD.osmNode({ id: 'e', loc: [3, 1] });
-        var f = iD.osmNode({ id: 'f', loc: [3, 0] });
+        var e = iD.osmNode({ id: 'e', loc: [8, 1] });
+        var f = iD.osmNode({ id: 'f', loc: [8, 0] });
         var g = iD.osmNode({ id: 'g', loc: [2, 0] });
         var h = iD.osmNode({ id: 'h', loc: [1, 0] });
         var graph = iD.coreGraph([

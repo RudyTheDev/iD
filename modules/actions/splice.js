@@ -1,4 +1,4 @@
-import { geoPointInPolygon } from "../geo";
+import { geoPointInPolygon } from '../geo';
 
 import { actionSplit } from './split';
 import { actionJoin } from './join';
@@ -242,7 +242,7 @@ export function actionSplice(selectedIDs, newWayIds) {
         if (cutline.nodes.length === 2 && parent.areAdjacent(startNode, endNode)) return null;
 
         return parent;
-    }
+    };
 
 
     action.getResultingWayIds = function () {
@@ -283,10 +283,7 @@ export function actionSplice(selectedIDs, newWayIds) {
 
             cutLineWay = graph.entity(selectedIDs[0]);
 
-            let startNode = graph.entity(cutLineWay.nodes[0]);
-            let startParents = graph.parentWays(startNode);
-            parentWay = startParents[0] === cutLineWay ? startParents[1]: startParents[0];
-            // todo: allow multiple as long as one is accepted area
+            parentWay = action.getSplicableAreaBetween(graph, cutLineWay); // expected to exist if operation allowed action with 1 way
         }
 
 
@@ -317,8 +314,6 @@ export function actionSplice(selectedIDs, newWayIds) {
 
                 if (!geoPointInPolygon(node.loc, parentPolygonCoords)) return 'cutline_outside_area';
             }
-
-            // todo: cutout nodes must be inside the parent area
         }
 
         // At this point, our own checks are good to go,
