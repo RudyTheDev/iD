@@ -54,6 +54,7 @@ export function actionSplice(selectedIDs, newWayIds) {
         console.log('splitting ' + sharedNodes);
 
         var split = actionSplit(sharedNodes, newWayIds);
+        split.limitWays([parentWayID]);
 
         graph = split(graph);
 
@@ -320,6 +321,7 @@ export function actionSplice(selectedIDs, newWayIds) {
         var sharedNodes = getSharedNodes(graph, cutLineWay.id);
 
         var split = actionSplit(sharedNodes, newWayIds);
+        split.limitWays([parentWay.id]);
 
         var splitDisabled = split.disabled(graph);
 
