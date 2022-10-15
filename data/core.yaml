@@ -512,6 +512,7 @@ en:
       cutline_nodes_in_relation: Cannot splice using a line which has nodes that are a member of a relation.
       cutline_connected_to_other: Cannot splice using a line which is connected to other ways.
       cutline_multiple_connection: Cannot splice using a line that connects to its parent area multiple times.
+      cutline_outside_area: Cannot splice using a line outside the bounds of the area.
       cannot_split_area: Cannot split the parent area at the connecting points.
       connected_to_hidden: This can't be spliced because it is connected to a hidden feature.
     restriction:

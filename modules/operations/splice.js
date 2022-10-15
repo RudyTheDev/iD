@@ -34,9 +34,9 @@ export function operationSplice(context, selectedIDs) {
         // Splicing operation is shown when the user selects something
         // that resembles a spicable setup - a line within an area
 
-        var graph = context.graph();
-
         if (selectedIDs.length === 2) {
+
+            let graph = context.graph();
 
             // Selected entities must be 2 ways - cut line within an area
 
@@ -68,6 +68,8 @@ export function operationSplice(context, selectedIDs) {
             return true;
 
         } else if (selectedIDs.length === 1) {
+
+            let graph = context.graph();
 
             // See if the selected entity is a way that forms a cut line for an area
 

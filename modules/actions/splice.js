@@ -1,3 +1,5 @@
+import { geoPointInPolygon } from "../geo";
+
 import { actionSplit } from './split';
 import { actionJoin } from './join';
 import { actionDeleteWay } from './delete_way';
@@ -292,6 +294,8 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         if (graph.parentRelations(cutLineWay).length > 0) return 'cutline_in_relation';
 
+        let parentPolygonCoords = parentWay.nodes.map(function(node) { return graph.entity(node).loc; });
+
         for (var i = 0; i < cutLineWay.nodes.length; i++) {
 
             var node = graph.entity(cutLineWay.nodes[i]);
@@ -310,6 +314,8 @@ export function actionSplice(selectedIDs, newWayIds) {
                         return 'cutline_connected_to_other';
                     }
                 }
+
+                if (!geoPointInPolygon(node.loc, parentPolygonCoords)) return 'cutline_outside_area';
             }
 
             // todo: cutout nodes must be inside the parent area
