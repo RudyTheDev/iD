@@ -33,9 +33,8 @@ export function actionSplice(selectedIDs, newWayIds) {
             cutLineWayID = selectedIDs[0];
 
             let cutline = graph.entity(selectedIDs[0]);
-            let startNode = graph.entity(cutline.nodes[0]);
-            let startParents = graph.parentWays(startNode);
-            parentWayID = startParents[0] === cutline ? startParents[1].id: startParents[0].id;
+
+            parentWayID = action.getSplicableAreaBetween(graph, cutline).id; // expected to exist if operation allowed action with 1 way
         }
 
         console.log('detagging');
@@ -203,6 +202,30 @@ export function actionSplice(selectedIDs, newWayIds) {
         var node2 = cutLineWay.nodes[cutLineWay.nodes.length - 1];
 
         return [node1, node2];
+    }
+
+
+    action.getSplicableAreaBetween = function(graph, cutline) {
+
+        let startNode = graph.entity(cutline.nodes[0]);
+        let endNode = graph.entity(cutline.nodes[cutline.nodes.length - 1]);
+
+        let startParents = graph.parentWays(startNode);
+        if (startParents.length !== 2) return null;
+
+        let endParents = graph.parentWays(endNode);
+        if (endParents.length !== 2) return null;
+
+        let parent = startParents[0] === cutline ? startParents[1] : startParents[0];
+
+        if (parent !== endParents[0] && parent !== endParents[1]) return null;
+
+        if (!parent.isClosed()) return null;
+
+        // Cut line cannot be an edge of the parent area
+        if (cutline.nodes.length === 2 && parent.areAdjacent(startNode, endNode)) return null;
+
+        return parent;
     }
 
 

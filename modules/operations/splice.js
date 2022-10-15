@@ -12,7 +12,6 @@ export function operationSplice(context, selectedIDs) {
 
 
     function getAction() {
-
         return actionSplice(selectedIDs);
     }
 
@@ -25,11 +24,15 @@ export function operationSplice(context, selectedIDs) {
 
         context.validator().validate();
 
+        // Select the new areas so the user can immediately work with them
         context.enter(modeSelect(context, _action.getResultingWayIds()));
     };
 
 
     operation.available = function() {
+
+        // Splicing operation is shown when the user selects something
+        // that resembles a spicable setup - a line within an area
 
         var graph = context.graph();
 
@@ -73,29 +76,14 @@ export function operationSplice(context, selectedIDs) {
 
             if (entity.isClosed()) return false;
 
-            let startNode = graph.entity(entity.nodes[0]);
-            let endNode = graph.entity(entity.nodes[entity.nodes.length - 1]);
+            let parent = _action.getSplicableAreaBetween(graph, entity);
 
-            // todo: allow other way connections, i.e. if we connect borders of exactly 1 area regardless what else we connect to
-
-            let startParents = graph.parentWays(startNode);
-            if (startParents.length !== 2) return false;
-
-            let endParents = graph.parentWays(endNode);
-            if (endParents.length !== 2) return false;
-
-            let parent = startParents[0] === entity ? startParents[1] : startParents[0];
-
-            if (parent !== endParents[0] && parent != endParents[1]) return false;
-
-            if (!parent.isClosed()) return false;
-
-            // Cut line cannot be an edge of the parent area
-            if (entity.nodes.length === 2 && parent.areAdjacent(startNode, endNode)) return false;
+            if (parent === null) return false;
 
             return true;
 
         } else {
+            // More than 2 ways would be ambiguous and we don't support "multi-splicing"
             return false;
         }
     };
