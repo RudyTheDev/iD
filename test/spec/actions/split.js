@@ -415,6 +415,84 @@ describe('iD.actionSplit', function () {
             expect(g4.entity('-').nodes).to.eql(['b', 'c', 'd']);
             expect(g4.entity('=').nodes).to.eql(['d', 'a', 'b']);
         });
+
+        it('splits a closed way exactly at the two given points', function () {
+            //
+            // Situation:
+            //    a ---- b
+            //    |      |
+            //    d ---- c       split at (1) 'a' & 'c', (2) 'b' & 'd'
+            //
+            // Expected results:
+            //    (1) a ==== b   (2) a ---- b
+            //        |   \  ||      |  /  ||
+            //        d ---- c       d ==== c
+            //
+            var graph = iD.coreGraph([
+                iD.osmNode({ id: 'a', loc: [0, 1] }),
+                iD.osmNode({ id: 'b', loc: [1, 1] }),
+                iD.osmNode({ id: 'c', loc: [1, 0] }),
+                iD.osmNode({ id: 'd', loc: [0, 0] }),
+                iD.osmWay({ id: '-', nodes: ['a', 'b', 'c', 'd', 'a']})
+            ]);
+
+            var g1 = iD.actionSplit(['a', 'c'], ['='])(graph);
+            expect(g1.entity('-').nodes).to.eql(['c', 'd', 'a']);
+            expect(g1.entity('=').nodes).to.eql(['a', 'b', 'c']);
+
+            var g2 = iD.actionSplit(['b', 'd'], ['='])(graph);
+            expect(g2.entity('-').nodes).to.eql(['b', 'c', 'd']);
+            expect(g2.entity('=').nodes).to.eql(['d', 'a', 'b']);
+        });
+
+        it('splits a closed way exactly at the two given points that are not natural split points', function () {
+            //
+            // Situation:
+            //    a ---- b ---- c --------------------- d
+            //    |                                     |
+            //    h ---- g ---- f --------------------- e       split at 'b' and 'g'
+            //
+            // Expected result:
+            //    a ==== b ---- c --------------------- d
+            //   ||    || |                             |
+            //    h ==== g ---- f --------------------- e
+            //
+            var graph = iD.coreGraph([
+                iD.osmNode({ id: 'a', loc: [0, 1] }),
+                iD.osmNode({ id: 'b', loc: [1, 1] }),
+                iD.osmNode({ id: 'c', loc: [2, 1] }),
+                iD.osmNode({ id: 'd', loc: [8, 1] }),
+                iD.osmNode({ id: 'e', loc: [8, 0] }),
+                iD.osmNode({ id: 'f', loc: [3, 0] }),
+                iD.osmNode({ id: 'g', loc: [2, 0] }),
+                iD.osmNode({ id: 'h', loc: [0, 0] }),
+                iD.osmWay({ id: '-', nodes: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a']})
+            ]);
+
+            // Without selecting/limiting the way
+
+            var g1 = iD.actionSplit(['b', 'g'], ['='])(graph);
+            expect(g1.entity('-').nodes).to.eql(['b', 'c', 'd', 'e', 'f', 'g']);
+            expect(g1.entity('=').nodes).to.eql(['g', 'h', 'a', 'b']);
+
+            var g2 = iD.actionSplit(['g', 'b'], ['='])(graph);
+            expect(g2.entity('-').nodes).to.eql(['b', 'c', 'd', 'e', 'f', 'g']);
+            expect(g2.entity('=').nodes).to.eql(['g', 'h', 'a', 'b']);
+
+            // With selected/limited way
+
+            let s1L = iD.actionSplit(['b', 'g'], ['=']);
+            s1L.limitWays(['-']);
+            var g1L = s1L(graph);
+            expect(g1L.entity('-').nodes).to.eql(['b', 'c', 'd', 'e', 'f', 'g']);
+            expect(g1L.entity('=').nodes).to.eql(['g', 'h', 'a', 'b']);
+
+            let s2L = iD.actionSplit(['g', 'b'], ['=']);
+            s2L.limitWays(['-']);
+            var g2L = s2L(graph);
+            expect(g2L.entity('-').nodes).to.eql(['b', 'c', 'd', 'e', 'f', 'g']);
+            expect(g2L.entity('=').nodes).to.eql(['g', 'h', 'a', 'b']);
+        });
     });
 
 
