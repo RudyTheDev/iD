@@ -28,59 +28,37 @@ export function actionSplice(selectedIDs, newWayIds) {
             parentWayID = ways[1].id;
 
         } else { // length === 1
-            // The user has selected a cutline that's in an area
+            // The user has selected a cutline only that's in an area we can assume
 
             cutLineWayID = selectedIDs[0];
 
             let cutline = graph.entity(selectedIDs[0]);
 
-            parentWayID = action.getSplicableAreaBetween(graph, cutline).id; // expected to exist if operation allowed action with 1 way
+            parentWayID = action.getSplicableAreaBetween(graph, cutline).id;
         }
-
-        console.log('detagging');
-
-        // todo: only if tagged
 
         var way = graph.entity(parentWayID);
 
         var originalTags = way.tags;
 
-        console.log('original tags were ' + originalTags);
-
         graph = graph.replace(way.update({ tags: [] }));
 
-        var sharedNodes = getSharedNodes(graph, cutLineWayID);
+        var terminalNodes = getTerminalNodes(graph, cutLineWayID);
 
-        console.log('splitting ' + sharedNodes);
-
-        var split = actionSplit(sharedNodes, newWayIds);
+        var split = actionSplit(terminalNodes, newWayIds);
         split.limitWays([parentWayID]);
 
         graph = split(graph);
 
         var createdWayIds = split.getCreatedWayIDs();
 
-        console.log('split result created way ids ' + createdWayIds);
-
-        console.assert(createdWayIds.length === 1);
-
-        console.log('final split ways are ' + parentWayID + ' and ' + createdWayIds[0]);
-
-        console.log('following');
-
         graph = followCutLine(graph, parentWayID, cutLineWayID);
         graph = followCutLine(graph, createdWayIds[0], cutLineWayID);
 
-        console.log('deleting temp way');
-
         graph = actionDeleteWay(cutLineWayID)(graph);
-
-        console.log('retagging both new ways');
 
         graph = reapplyTags(graph, parentWayID, originalTags);
         graph = reapplyTags(graph, createdWayIds[0], originalTags);
-
-        console.log('done');
 
         _resultingWayIds = [ parentWayID, createdWayIds[0] ];
 
@@ -88,40 +66,27 @@ export function actionSplice(selectedIDs, newWayIds) {
 
 
         function followCutLine(graph, wayId, followedWayId) {
-
-            // todo: make this into a separate action?
-
             // If we have a way 2-3-4-5-6 and we want to follow way 6-8-9-2, we will end up with 2-3-4-5-6-8-9-2
 
             var way = graph.entity(wayId);
             var followedWay = graph.entity(followedWayId);
 
-            console.log('following ' + way + ' along ' + followedWay);
-
-            console.log('way nodes are ' + way.nodes);
-
-
             var appendableNodes = followedWay.nodes;
-
             if (way.nodes[0] === followedWay.nodes[0]) { // i.e. ways have opposite directions
                 appendableNodes = appendableNodes.reverse();
             }
 
-            console.log('following nodes ' + appendableNodes);
-
             for (let i = 1; i < appendableNodes.length; i++) {
                 way = way.addNode(appendableNodes[i]);
-
-                console.log('added ' + appendableNodes[i] + ' to way and nodes are now ' + way.nodes);
             }
-
-            console.log('way nodes are now ' + way.nodes);
 
             return graph.replace(way);
         }
 
 
         function reapplyTags(graph, wayID, originalTags) {
+
+            // todo: only if tagged
 
             var copiedTags = {};
             Object.keys(originalTags).forEach(function(key) { copiedTags[key] = originalTags[key]; });
@@ -134,9 +99,7 @@ export function actionSplice(selectedIDs, newWayIds) {
     };
 
 
-    function getSharedNodes(graph, cutLineWayID) {
-
-        // todo: learn to fail so we can use this to validate
+    function getTerminalNodes(graph, cutLineWayID) {
 
         var cutLineWay = graph.entity(cutLineWayID);
 
@@ -190,9 +153,6 @@ export function actionSplice(selectedIDs, newWayIds) {
 
     // Returns a two-element array: the cutout line and parent area
     action.findCutLineAndArea = function(graph, selectedIDs) {
-
-        console.assert(selectedIDs.length === 2);
-
         var entity1 = graph.hasEntity(selectedIDs[0]);
         var entity2 = graph.hasEntity(selectedIDs[1]);
 
@@ -205,7 +165,6 @@ export function actionSplice(selectedIDs, newWayIds) {
 
 
     action.disabled = function(graph) {
-
         var cutLineWay;
         var parentWay;
 
@@ -285,9 +244,9 @@ export function actionSplice(selectedIDs, newWayIds) {
         // At this point, our own checks are good to go,
         // but we rely on split action internally, so check that we can actually split
 
-        var sharedNodes = getSharedNodes(graph, cutLineWay.id);
+        var terminalNodes = getTerminalNodes(graph, cutLineWay.id);
 
-        var split = actionSplit(sharedNodes, newWayIds);
+        var split = actionSplit(terminalNodes, newWayIds);
         split.limitWays([parentWay.id]);
 
         var splitDisabled = split.disabled(graph);
