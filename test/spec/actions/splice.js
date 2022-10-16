@@ -30,6 +30,31 @@ describe('iD.actionSplice', function () {
             expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_tagged');
         });
 
+        it('disabled when cutline in in a relation', function () {
+            //
+            // Situation:
+            //    b ---> c
+            //    ^ \    |
+            //    |    \ |
+            //    a <--- d
+            //
+            //    Area a-b-c-d-a
+            //    Cut line b-d; in is relation
+
+            var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+            var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+            var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+            var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+            var graph = iD.coreGraph([
+                a, b, c, d,
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+                iD.osmRelation({ id: 'relation', members: [ { id: 'cutline', type: 'way' } ]})
+            ]);
+
+            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_in_relation');
+        });
+
         it('disabled when cutline\'s inner node has tags', function () {
             //
             // Situation:
@@ -55,6 +80,34 @@ describe('iD.actionSplice', function () {
             ]);
 
             expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_nodes_tagged');
+        });
+
+        it('disabled when cutline\'s inner node is in a relation', function () {
+            //
+            // Situation:
+            //    b ------> c
+            //    ^  \      |
+            //    |    x    |
+            //    |      \  v
+            //    a <------ d
+            //
+            //    Area a-b-c-d-a
+            //    Cut line b-x-d
+            //    Node x is in relation
+
+            var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+            var b = iD.osmNode({ id: 'b', loc: [0, 2] });
+            var c = iD.osmNode({ id: 'c', loc: [2, 2] });
+            var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+            var x = iD.osmNode({ id: 'x', loc: [1, 1] });
+            var graph = iD.coreGraph([
+                a, b, c, d, x,
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] }),
+                iD.osmRelation({ id: 'relation', members: [ { id: 'x', type: 'way' } ]})
+            ]);
+
+            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_nodes_in_relation');
         });
 
         it('disabled when cutline\'s inner node connects to other ways', function () {
@@ -148,9 +201,45 @@ describe('iD.actionSplice', function () {
             expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_outside_area');
         });
 
-        // todo: cutline in relation
-        // todo: cutline node in relation
-        // todo: cutline intersect inner member
+        it('disabled when cutline intersects with another way in parent way\'s multipolygon relation', function () {
+            //
+            // Situation:
+            //    b ------------> c
+            //    ^ \             |
+            //    |   \           |
+            //    |  u -\ ---- w  |
+            //    |  |    \    |  |
+            //    |  y -----\- z  |
+            //    |           \   |
+            //    |             \ |
+            //    a <------------ d
+            //
+            //    Area a-b-c-d-a
+            //    Cut line b-d
+            //    Inner area y-u-w-z-y
+            //    Relation containing Area and Inner area
+
+            var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+            var b = iD.osmNode({ id: 'b', loc: [0, 5] });
+            var c = iD.osmNode({ id: 'c', loc: [5, 5] });
+            var d = iD.osmNode({ id: 'd', loc: [5, 0] });
+            var y = iD.osmNode({ id: 'y', loc: [1, 2] });
+            var u = iD.osmNode({ id: 'u', loc: [1, 3] });
+            var w = iD.osmNode({ id: 'w', loc: [4, 3] });
+            var z = iD.osmNode({ id: 'z', loc: [4, 2] });
+            var graph = iD.coreGraph([
+                a, b, c, d, y, u, w, z,
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+                iD.osmWay({ id: 'inside', nodes: ['y', 'u', 'w', 'z', 'y'] }),
+                iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
+                    { id: 'area', type: 'way' },
+                    { id: 'inside', type: 'way' }
+                ]})
+            ]);
+
+            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_intersects_inner_members');
+        });
 
     });
 
