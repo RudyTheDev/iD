@@ -48,7 +48,7 @@ export function actionSplit(nodeIds, newWayIds) {
     // of nodes).
     // For example: bone-shaped areas get split across their waist
     // line, circles across the diameter.
-    function splitArea(nodes, idxA, graph) {
+    function choosePartnerNodeForAreaSplit(nodes, idxA, graph) {
         var lengths = new Array(nodes.length);
         var length;
         var i;
@@ -94,7 +94,7 @@ export function actionSplit(nodeIds, newWayIds) {
         return totalLength;
     }
 
-    function split(graph, nodeId, wayA, newWayId) {
+    function split(graph, nodeId, wayA, allNodeIds, newWayId) {
         var wayB = osmWay({ id: newWayId, tags: wayA.tags });   // `wayB` is the NEW way
         var origNodes = wayA.nodes.slice();
         var nodesA;
@@ -105,7 +105,18 @@ export function actionSplit(nodeIds, newWayIds) {
         if (wayA.isClosed()) {
             var nodes = wayA.nodes.slice(0, -1);
             var idxA = nodes.indexOf(nodeId);
-            var idxB = splitArea(nodes, idxA, graph);
+            var idxB;
+            // Try to find another node that was selected for splitting on the same way
+            var otherSplitNode = allNodeIds.find(function(n) {
+                return n !== nodeId && wayA.nodes.includes(n);
+            });
+            if (otherSplitNode === undefined) {
+                // Only this one node was given for this way, so choose a (new) second one
+                idxB = choosePartnerNodeForAreaSplit(nodes, idxA, graph);
+            } else {
+                // More than one node was given for this way, so use one of them, i.e. only split at the nodes
+                idxB = nodes.indexOf(otherSplitNode);
+            }
 
             if (idxB < idxA) {
                 nodesA = nodes.slice(idxA).concat(nodes.slice(0, idxB + 1));
@@ -272,7 +283,8 @@ export function actionSplit(nodeIds, newWayIds) {
             var nodeId = nodeIds[i];
             var candidates = action.waysForNode(nodeId, graph);
             for (var j = 0; j < candidates.length; j++) {
-                graph = split(graph, nodeId, candidates[j], newWayIds && newWayIds[newWayIndex]);
+
+                graph = split(graph, nodeId, candidates[j], nodeIds, newWayIds && newWayIds[newWayIndex]);
                 newWayIndex += 1;
             }
         }
