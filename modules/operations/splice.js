@@ -10,6 +10,9 @@ export function operationSplice(context, selectedIDs) {
 
     var _action = getAction();
 
+    var _cutlineId;
+    var _areaId;
+
 
     function getAction() {
         return actionSplice(selectedIDs);
@@ -65,6 +68,9 @@ export function operationSplice(context, selectedIDs) {
             // Cut line cannot be an edge of the parent area
             if (ways[0].nodes.length === 2 && ways[1].areAdjacent(startNode, endNode)) return false;
 
+            _cutlineId = ways[0].id;
+            _areaId = ways[1].id;
+
             return true;
 
         } else if (selectedIDs.length === 1) {
@@ -82,12 +88,19 @@ export function operationSplice(context, selectedIDs) {
 
             if (parent === null) return false;
 
+            _cutlineId = entity.id;
+            _areaId = parent.id;
+
             return true;
 
         } else {
             // More than 2 ways would be ambiguous and we don't support "multi-splicing"
             return false;
         }
+    };
+
+    operation.relatedEntityIds = function() {
+        return [_cutlineId, _areaId];
     };
 
     operation.disabled = function() {
