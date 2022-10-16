@@ -92,6 +92,8 @@ export function operationSplice(context, selectedIDs) {
 
     operation.disabled = function() {
 
+        // todo: extent? splicing is awesome for huge area, but you can't even zoom out in osm to splice them, sooo...
+
         var actionDisabled = _action.disabled(context.graph());
         if (actionDisabled) return actionDisabled;
 
