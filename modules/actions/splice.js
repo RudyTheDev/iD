@@ -1,7 +1,6 @@
 import { geoPathHasIntersections, geoPointInPolygon } from '../geo';
 
 import { actionSplit } from './split';
-import { actionJoin } from './join';
 import { actionDeleteWay } from './delete_way';
 
 //
@@ -11,7 +10,6 @@ import { actionDeleteWay } from './delete_way';
 // Note that this internally relies on split and join actions,
 // so it is not guaranteed which ids and in what order will be preserved.
 export function actionSplice(selectedIDs, newWayIds) {
-
 
     var _resultingWayIds;
 
@@ -64,34 +62,14 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         console.log('split result created way ids ' + createdWayIds);
 
-        console.assert(createdWayIds.length >= 1 && createdWayIds.length <= 2);
+        console.assert(createdWayIds.length === 1);
 
-        var splitWay1Id;
-        var splitWay2Id;
-
-        if (createdWayIds.length === 2) {
-            // Because split action is unpredicatable and can create 3 ways even though we gave it 2 points,
-            // we sometimes need to recombine the 'double-split' way back into a single way.
-
-            console.log('combining one of double-split ways from ' + parentWayID + ', ' + createdWayIds[0] + ' and ' + createdWayIds[1]);
-
-            var recombination = recombine(graph, parentWayID, createdWayIds[0], createdWayIds[1], sharedNodes);
-
-            graph = recombination.graph;
-            splitWay1Id = recombination.ways[0];
-            splitWay2Id = recombination.ways[1];
-
-        } else {
-            splitWay1Id = parentWayID;
-            splitWay2Id = createdWayIds[0];
-        }
-
-        console.log('final split ways are ' + splitWay1Id + ' and ' + splitWay2Id);
+        console.log('final split ways are ' + parentWayID + ' and ' + createdWayIds[0]);
 
         console.log('following');
 
-        graph = followCutLine(graph, splitWay1Id, cutLineWayID);
-        graph = followCutLine(graph, splitWay2Id, cutLineWayID);
+        graph = followCutLine(graph, parentWayID, cutLineWayID);
+        graph = followCutLine(graph, createdWayIds[0], cutLineWayID);
 
         console.log('deleting temp way');
 
@@ -99,12 +77,12 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         console.log('retagging both new ways');
 
-        graph = reapplyTags(graph, splitWay1Id, originalTags);
-        graph = reapplyTags(graph, splitWay2Id, originalTags);
+        graph = reapplyTags(graph, parentWayID, originalTags);
+        graph = reapplyTags(graph, createdWayIds[0], originalTags);
 
         console.log('done');
 
-        _resultingWayIds = [ splitWay1Id, splitWay2Id ];
+        _resultingWayIds = [ parentWayID, createdWayIds[0] ];
 
         return graph;
 
@@ -152,45 +130,6 @@ export function actionSplice(selectedIDs, newWayIds) {
             graph = graph.replace(graph.entity(wayID).update({ tags: copiedTags }));
 
             return graph;
-        }
-
-
-        function recombine(graph, way1Id, way2Id, way3Id, terminalNodes) {
-            var way1 = graph.entity(way1Id);
-            var way2 = graph.entity(way2Id);
-            //var way3 = graph.entity(way3Id);
-
-            // See which way is not broken, that is, has the start and end nodes.
-            // The other two ways will be joined into one way.
-
-            var joinableWay1Id;
-            var joinableWay2Id;
-            var completeWayId;
-
-            if (way1.contains(terminalNodes[0]) && way1.contains(terminalNodes[1])) {
-                joinableWay1Id = way2Id;
-                joinableWay2Id = way3Id;
-                completeWayId = way1Id;
-            } else if (way2.contains(terminalNodes[0]) && way2.contains(terminalNodes[1])) {
-                joinableWay1Id = way1Id;
-                joinableWay2Id = way3Id;
-                completeWayId = way2Id;
-            } else { // must be the third one
-                joinableWay1Id = way1Id;
-                joinableWay2Id = way2Id;
-                completeWayId = way3Id;
-            }
-
-            var join = actionJoin([ joinableWay1Id, joinableWay2Id ]);
-            graph = join(graph);
-
-            var remainingWayId = graph.hasEntity(joinableWay1Id) ? joinableWay1Id : joinableWay2Id;
-            // todo: add getting of survivor from join action instead
-
-            return {
-                graph: graph,
-                ways: [ completeWayId, remainingWayId ]
-            };
         }
     };
 
