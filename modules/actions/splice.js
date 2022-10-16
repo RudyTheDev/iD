@@ -7,8 +7,6 @@ import { actionDeleteWay } from './delete_way';
 // For testing convenience, accepts an ID to assign to the new way.
 // Normally, this will be undefined and the way will automatically
 // be assigned a new ID.
-// Note that this internally relies on split and join actions,
-// so it is not guaranteed which ids and in what order will be preserved.
 export function actionSplice(selectedIDs, newWayIds) {
 
     var _resultingWayIds;
