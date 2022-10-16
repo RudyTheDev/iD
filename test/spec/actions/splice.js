@@ -132,7 +132,7 @@ describe('iD.actionSplice', function () {
             var x = iD.osmNode({ id: 'x', loc: [1, 1] });
             var y = iD.osmNode({ id: 'y', loc: [1.5, 1.5] });
             var graph = iD.coreGraph([
-                a, b, c, d, x,
+                a, b, c, d, x, y,
                 iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] }),
                 iD.osmWay({ id: 'other', nodes: ['x', 'y'] })
