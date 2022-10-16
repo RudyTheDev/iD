@@ -293,7 +293,8 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         let parentPolygonCoords = parentWay.nodes.map(function(node) { return graph.entity(node).loc; });
 
-        for (let i = 0; i < cutLineWay.nodes.length; i++) {
+        for (let i = 1; i < cutLineWay.nodes.length - 1; i++) {
+            // Note that we don't care about first and last node - they won't be removed or changed
 
             let node = graph.entity(cutLineWay.nodes[i]);
 
@@ -301,19 +302,15 @@ export function actionSplice(selectedIDs, newWayIds) {
 
             if (graph.parentRelations(node).length > 0) return 'cutline_nodes_in_relation';
 
-            if (i === 0 || i === cutLineWay.nodes.length - 1) {
-                //if (graph.parentWays(node).length > 2) return 'cutline_connected_to_other';
-            } else {
-                if (graph.isShared(node)) {
-                    if (graph.parentWays(node).includes(parentWay)) {
-                        return 'cutline_multiple_connection';
-                    } else {
-                        return 'cutline_connected_to_other';
-                    }
+            if (graph.isShared(node)) {
+                if (graph.parentWays(node).includes(parentWay)) {
+                    return 'cutline_multiple_connection';
+                } else {
+                    return 'cutline_connected_to_other';
                 }
-
-                if (!geoPointInPolygon(node.loc, parentPolygonCoords)) return 'cutline_outside_area';
             }
+
+            if (!geoPointInPolygon(node.loc, parentPolygonCoords)) return 'cutline_outside_area';
         }
 
         // Check that the cut won't intersect other members of the parent's relation,

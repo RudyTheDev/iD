@@ -4,13 +4,152 @@ describe('iD.actionSplice', function () {
 
     describe('#disabled', function () {
 
-        // todo: cutline has tags
+        // todo: check valid cases to not be disabled
+
+        it('disabled when cutline has tags', function () {
+            //
+            // Situation:
+            //    b ---> c
+            //    ^ \    |
+            //    |    \ |
+            //    a <--- d
+            //
+            //    Area a-b-c-d-a
+            //    Cut line b-d; has tags
+
+            var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+            var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+            var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+            var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+            var graph = iD.coreGraph([
+                a, b, c, d,
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'cutline', nodes: ['b', 'd'], tags: { interesting: 'yes' } })
+            ]);
+
+            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_tagged');
+        });
+
+        it('disabled when cutline\'s inner node has tags', function () {
+            //
+            // Situation:
+            //    b ------> c
+            //    ^  \      |
+            //    |    x    |
+            //    |      \  v
+            //    a <------ d
+            //
+            //    Area a-b-c-d-a
+            //    Cut line b-x-d
+            //    Node x has tags
+
+            var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+            var b = iD.osmNode({ id: 'b', loc: [0, 2] });
+            var c = iD.osmNode({ id: 'c', loc: [2, 2] });
+            var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+            var x = iD.osmNode({ id: 'x', loc: [1, 1], tags: { interesting: 'yes' } });
+            var graph = iD.coreGraph([
+                a, b, c, d, x,
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
+            ]);
+
+            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_nodes_tagged');
+        });
+
+        it('disabled when cutline\'s inner node connects to other ways', function () {
+            //
+            // Situation:
+            //    b --------> c
+            //    ^ \         |
+            //    |   \   y   |
+            //    |     x     |
+            //    |       \   |
+            //    |         \ v
+            //    a <-------- d
+            //
+            //    Area a-b-c-d-a
+            //    Cut line b-x-d
+            //    Way x-y
+
+            var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+            var b = iD.osmNode({ id: 'b', loc: [0, 2] });
+            var c = iD.osmNode({ id: 'c', loc: [2, 2] });
+            var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+            var x = iD.osmNode({ id: 'x', loc: [1, 1] });
+            var y = iD.osmNode({ id: 'y', loc: [1.5, 1.5] });
+            var graph = iD.coreGraph([
+                a, b, c, d, x,
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] }),
+                iD.osmWay({ id: 'other', nodes: ['x', 'y'] })
+            ]);
+
+            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_connected_to_other');
+        });
+
+        it('disabled when cutline\'s inner node connect to parent way', function () {
+            //
+            // Situation:
+            //    b -----> c
+            //    ^  \     |
+            //    |     \  |
+            //    |        x
+            //    |     /  |
+            //    |  /     v
+            //    a <----- d
+            //
+            //    Area a-b-c-x-d-a
+            //    Cut line b-x-d
+            //    Node x is shared
+            //
+
+            var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+            var b = iD.osmNode({ id: 'b', loc: [0, 4] });
+            var c = iD.osmNode({ id: 'c', loc: [2, 4] });
+            var x = iD.osmNode({ id: 'x', loc: [2, 2] });
+            var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+            var graph = iD.coreGraph([
+                a, b, c, d, x,
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'x', 'd', 'a'] }),
+                iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'a'] })
+            ]);
+
+            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_multiple_connection');
+        });
+
+        it('disabled when cutline\'s inner node is outside the parent way', function () {
+            //
+            // Situation:
+            //
+            //           __--- x
+            //     ---```     /
+            //    b ---> c   /
+            //    ^      |  /
+            //    |      | /
+            //    a <--- d
+            //
+            //    Area a-b-c-d-a
+            //    Cut line b-x-d
+            //    Node x is outside area
+            //
+
+            var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+            var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+            var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+            var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+            var x = iD.osmNode({ id: 'x', loc: [2, 2] });
+            var graph = iD.coreGraph([
+                a, b, c, d, x,
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
+            ]);
+
+            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_outside_area');
+        });
+
         // todo: cutline in relation
-        // todo: cutline node has tags
         // todo: cutline node in relation
-        // todo: cutline inner connects to area multiple
-        // todo: cutline inner connects to other ways
-        // todo: cutline node outside area
         // todo: cutline intersect inner member
 
     });
@@ -357,5 +496,38 @@ describe('iD.actionSplice', function () {
         expect(areaShort.nodes).to.include.members(['a', 'b', 'c', 'h']);
         expect(areaLong.nodes).to.include.members(['c', 'd', 'e', 'f', 'g', 'h']);
         // todo: how do I assert order without caring about the starting element
+    });
+
+    it('splices when a cutline\'s terminal node has tags', function () {
+        //
+        // Situation:
+        //    b ---> c
+        //    ^ \    |
+        //    |    \ |
+        //    a <--- d
+        //
+        //    Area a-b-c-d-a
+        //    Cut line b-d
+        //    Node d has tags
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1], tags: { interesting: 'yes' } });
+        var graph = iD.coreGraph([
+            a, b, c, d,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] })
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 });
