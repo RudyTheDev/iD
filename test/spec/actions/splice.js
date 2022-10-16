@@ -11,6 +11,7 @@ describe('iD.actionSplice', function () {
         // todo: cutline inner connects to area multiple
         // todo: cutline inner connects to other ways
         // todo: cutline node outside area
+        // todo: cutline intersect inner member
 
     });
 

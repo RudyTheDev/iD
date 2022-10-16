@@ -1,4 +1,4 @@
-import { geoPointInPolygon } from '../geo';
+import { geoPathHasIntersections, geoPointInPolygon } from '../geo';
 
 import { actionSplit } from './split';
 import { actionJoin } from './join';
@@ -293,9 +293,9 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         let parentPolygonCoords = parentWay.nodes.map(function(node) { return graph.entity(node).loc; });
 
-        for (var i = 0; i < cutLineWay.nodes.length; i++) {
+        for (let i = 0; i < cutLineWay.nodes.length; i++) {
 
-            var node = graph.entity(cutLineWay.nodes[i]);
+            let node = graph.entity(cutLineWay.nodes[i]);
 
             if (node.hasInterestingTags()) return 'cutline_nodes_tagged';
 
@@ -313,6 +313,36 @@ export function actionSplice(selectedIDs, newWayIds) {
                 }
 
                 if (!geoPointInPolygon(node.loc, parentPolygonCoords)) return 'cutline_outside_area';
+            }
+        }
+
+        // Check that the cut won't intersect other members of the parent's relation,
+        // for example, an inner hole of an area.
+
+        let parentRelations = graph.parentRelations(parentWay);
+
+        if (parentRelations.length > 0) {
+
+            let cutlineCoords = cutLineWay.nodes.map(function(node) { return graph.entity(node).loc; });
+
+            for (let i = 0; i < parentRelations.length; i++) {
+
+                if (!parentRelations[i].isMultipolygon()) continue;
+
+                let relationMembers = parentRelations[i].members;
+
+                for (let i = 0; i < relationMembers.length; i++) {
+
+                    if (relationMembers[i].id === parentWay.id) continue;
+
+                    if (relationMembers[i].type !== 'way') continue;
+
+                    // todo: relation in a relation? does it matter?
+
+                    let memberCoords = graph.entity(relationMembers[i].id).nodes.map(function(node) { return graph.entity(node).loc; });
+
+                    if (geoPathHasIntersections(cutlineCoords, memberCoords)) return 'cutline_intersects_inner_members';
+                }
             }
         }
 
