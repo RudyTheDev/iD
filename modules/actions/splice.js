@@ -131,6 +131,8 @@ export function actionSplice(selectedIDs, newWayIds) {
 
             if (!startParents[i].isClosed()) continue; // ignoring open ways
 
+            if (!startParents[i].isArea()) continue; // ignoring closed ways that aren't areas
+
             if (!endParents.includes(startParents[i])) continue;
 
             if (parent !== null) return null; // multiple splicable areas - ambiguous

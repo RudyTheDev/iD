@@ -19,14 +19,14 @@ describe('iD.actionSplice', function () {
             var d = iD.osmNode({ id: 'd', loc: [0, 1] });
             var graph = iD.coreGraph([
                 a, b, c, d,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'd'], tags: { interesting: 'yes' } })
             ]);
 
             expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_tagged');
         });
 
-        it('disabled when cutline in in a relation', function () {
+        it('disabled when cutline is in a relation', function () {
             //
             // Situation:
             //    b ---> c
@@ -43,7 +43,7 @@ describe('iD.actionSplice', function () {
             var d = iD.osmNode({ id: 'd', loc: [0, 1] });
             var graph = iD.coreGraph([
                 a, b, c, d,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
                 iD.osmRelation({ id: 'relation', members: [ { id: 'cutline', type: 'way' } ]})
             ]);
@@ -71,7 +71,7 @@ describe('iD.actionSplice', function () {
             var x = iD.osmNode({ id: 'x', loc: [1, 1], tags: { interesting: 'yes' } });
             var graph = iD.coreGraph([
                 a, b, c, d, x,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
             ]);
 
@@ -98,7 +98,7 @@ describe('iD.actionSplice', function () {
             var x = iD.osmNode({ id: 'x', loc: [1, 1] });
             var graph = iD.coreGraph([
                 a, b, c, d, x,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] }),
                 iD.osmRelation({ id: 'relation', members: [ { id: 'x', type: 'way' } ]})
             ]);
@@ -129,7 +129,7 @@ describe('iD.actionSplice', function () {
             var y = iD.osmNode({ id: 'y', loc: [1.5, 1.5] });
             var graph = iD.coreGraph([
                 a, b, c, d, x, y,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] }),
                 iD.osmWay({ id: 'other', nodes: ['x', 'y'] })
             ]);
@@ -160,7 +160,7 @@ describe('iD.actionSplice', function () {
             var d = iD.osmNode({ id: 'd', loc: [0, 2] });
             var graph = iD.coreGraph([
                 a, b, c, d, x,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'x', 'd', 'a'] }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'x', 'd', 'a'], tags: { area: 'yes' } }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'a'] })
             ]);
 
@@ -190,7 +190,7 @@ describe('iD.actionSplice', function () {
             var x = iD.osmNode({ id: 'x', loc: [2, 2] });
             var graph = iD.coreGraph([
                 a, b, c, d, x,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
             ]);
 
@@ -225,7 +225,7 @@ describe('iD.actionSplice', function () {
             var z = iD.osmNode({ id: 'z', loc: [4, 2] });
             var graph = iD.coreGraph([
                 a, b, c, d, y, u, w, z,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
                 iD.osmWay({ id: 'inside', nodes: ['y', 'u', 'w', 'z', 'y'] }),
                 iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
@@ -257,7 +257,7 @@ describe('iD.actionSplice', function () {
         var d = iD.osmNode({ id: 'd', loc: [0, 1] });
         var graph = iD.coreGraph([
             a, b, c, d,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] })
         ]);
 
@@ -291,7 +291,7 @@ describe('iD.actionSplice', function () {
         var x = iD.osmNode({ id: 'x', loc: [1, 1] });
         var graph = iD.coreGraph([
             a, b, c, d, x,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
         ]);
 
@@ -325,7 +325,7 @@ describe('iD.actionSplice', function () {
         var y = iD.osmNode({ id: 'y', loc: [2, 0] });
         var graph = iD.coreGraph([
             a, b, c, d, y,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
             iD.osmWay({ id: 'Y', nodes: ['d', 'y'] })
         ]);
@@ -363,7 +363,7 @@ describe('iD.actionSplice', function () {
         var u = iD.osmNode({ id: 'u', loc: [1, -1] });
         var graph = iD.coreGraph([
             a, b, c, d, y, u,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
             iD.osmWay({ id: 'Y', nodes: ['u', 'd', 'y'] })
         ]);
@@ -399,7 +399,7 @@ describe('iD.actionSplice', function () {
         var u = iD.osmNode({ id: 'u', loc: [2, 1] });
         var graph = iD.coreGraph([
             a, b, c, d, y, u,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
             iD.osmWay({ id: 'Y', nodes: ['d', 'y', 'u', 'd'] })
         ]);
@@ -438,7 +438,7 @@ describe('iD.actionSplice', function () {
         var w = iD.osmNode({ id: 'w', loc: [0, 2] });
         var graph = iD.coreGraph([
             a, b, c, d, y, u, w,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
             iD.osmWay({ id: 'Y', nodes: ['d', 'y', 'u', 'w', 'b'] })
         ]);
@@ -477,7 +477,7 @@ describe('iD.actionSplice', function () {
         var w = iD.osmNode({ id: 'w', loc: [0, 2] });
         var graph = iD.coreGraph([
             a, b, c, d, y, u, w,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
             iD.osmWay({ id: 'Y', nodes: ['a', 'b', 'w', 'u', 'y', 'd', 'a'] })
         ]);
@@ -506,7 +506,7 @@ describe('iD.actionSplice', function () {
         var d = iD.osmNode({ id: 'd', loc: [0, 1], tags: { interesting: 'yes' } });
         var graph = iD.coreGraph([
             a, b, c, d,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] })
         ]);
 

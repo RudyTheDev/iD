@@ -38,6 +38,8 @@ export function operationSplice(context, selectedIDs) {
         // Splicing operation is shown when the user selects something
         // that resembles a spicable setup - a line within an area
 
+        if (selectedIDs.length === 0) return false;
+
         if (selectedIDs.length > 2) {
             // More than 2 ways would be ambiguous and we don't support "multi-splicing"
             return false;
@@ -62,6 +64,8 @@ export function operationSplice(context, selectedIDs) {
 
 
             var ways = _action.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+
+            if (!ways[1].isArea()) return false;
 
             let startNode = ways[0].nodes[0];
             let endNode = ways[0].nodes[ways[0].nodes.length - 1];

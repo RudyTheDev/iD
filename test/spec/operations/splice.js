@@ -24,7 +24,7 @@ describe('iD.operationSplice', function () {
 
         graph = iD.coreGraph([
             a, b, c, d,
-            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'], tags: { interesting: 'yes' } })
         ]);
     });
