@@ -269,8 +269,8 @@ export function actionSplit(nodeIds, newWayIds) {
 
         _createdWayIDs.push(wayB.id);
 
-        // TODO:
         // If the exact ways to be split were given (selected), then the newly-created way should also be a part of it
+        // (or further nodes that are on this new way will not split it further)
         if (_wayIDs) _wayIDs.push(wayB.id);
 
         return graph;
