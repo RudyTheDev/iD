@@ -7,7 +7,7 @@ describe('iD.actionSplice', function () {
             // Situation:
             //    b ---> c
             //    ^ \    |
-            //    |    \ |
+            //    |    \ v
             //    a <--- d
             //
             //    Area a-b-c-d-a
@@ -31,7 +31,7 @@ describe('iD.actionSplice', function () {
             // Situation:
             //    b ---> c
             //    ^ \    |
-            //    |    \ |
+            //    |    \ v
             //    a <--- d
             //
             //    Area a-b-c-d-a
@@ -175,7 +175,7 @@ describe('iD.actionSplice', function () {
             //     ---```     /
             //    b ---> c   /
             //    ^      |  /
-            //    |      | /
+            //    |      v /
             //    a <--- d
             //
             //    Area a-b-c-d-a
@@ -207,7 +207,7 @@ describe('iD.actionSplice', function () {
             //    |  |    \    |  |
             //    |  y -----\- z  |
             //    |           \   |
-            //    |             \ |
+            //    |             \ v
             //    a <------------ d
             //
             //    Area a-b-c-d-a
@@ -245,7 +245,7 @@ describe('iD.actionSplice', function () {
         // Situation:
         //    b ---> c
         //    ^ \    |
-        //    |    \ |
+        //    |    \ v
         //    a <--- d
         //
         //    Area a-b-c-d-a
@@ -311,7 +311,7 @@ describe('iD.actionSplice', function () {
         // Situation:
         //    b ---> c
         //    ^ \    |
-        //    |    \ |
+        //    |    \ v
         //    a <--- d ---> y
         //
         //    Area a-b-c-d-a
@@ -346,8 +346,8 @@ describe('iD.actionSplice', function () {
         // Situation:
         //    b ---> c
         //    ^ \    |
-        //    |    \ |
-        //    a <--- d ---> y
+        //    |    \ v
+        //    a <--- d ---- y
         //           |
         //           u
         //
@@ -384,8 +384,8 @@ describe('iD.actionSplice', function () {
         // Situation:
         //    b ---> c      u
         //    ^ \    |    / |
-        //    |    \ |  /   |
-        //    a <--- d ---> y
+        //    |    \ v  /   |
+        //    a <--- d ---- y
         //
         //    Area a-b-c-d-a
         //    Area d-y-u-d
@@ -418,12 +418,12 @@ describe('iD.actionSplice', function () {
     it('splices when another way connects to both nodes', function () {
         //
         // Situation:
-        //    w-------------u
+        //    w ----------- u
         //    |             |
         //    b ---> c      |
         //    ^ \    |      |
-        //    |    \ |      |
-        //    a <--- d ---> y
+        //    |    \ v      |
+        //    a <--- d ---- y
         //
         //    Area a-b-c-d-a
         //    Way d-y-u-w-b
@@ -457,12 +457,12 @@ describe('iD.actionSplice', function () {
     it('splices explicitly when another area connects to both nodes', function () {
         //
         // Situation:
-        //    w-------------u
+        //    w ----------- u
         //    |             |
         //    b ---> c      |
         //    ^ \    |      |
-        //    |    \ |      |
-        //    a <--- d ---> y
+        //    |    \ v      |
+        //    a <--- d ---- y
         //
         //    Area a-b-c-d-a
         //    Area a-b-w-u-y-d-a
@@ -493,7 +493,7 @@ describe('iD.actionSplice', function () {
         // Situation:
         //    b ---> c
         //    ^ \    |
-        //    |    \ |
+        //    |    \ v
         //    a <--- d
         //
         //    Area a-b-c-d-a
@@ -521,12 +521,96 @@ describe('iD.actionSplice', function () {
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
+    it('splices an area in a relation', function () {
+        //
+        // Situation:
+        //    b ---> c
+        //    ^ \    |
+        //    |    \ v
+        //    a <--- d
+        //
+        //    Area a-b-c-d-a
+        //    Cut line b-d
+        //    Relation containing Area and Node e
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var graph = iD.coreGraph([
+            a, b, c, d,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+            iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
+                { id: 'area', type: 'way' },
+            ]})
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+    });
+
+    it('splice when cutline doesn\'t intersect with another way in parent way\'s multipolygon relation', function () {
+        //
+        // Situation:
+        //    b -- c --------> d
+        //    ^    :           |
+        //    |    :   u -- w  |
+        //    |    :   |    |  |
+        //    |    :   y -- z  |
+        //    |    :           v
+        //    a <- f <-------- e
+        //
+        //    Area a-b-c-d-e-f-a
+        //    Cut line c-f
+        //    Inner area y-u-w-z-y
+        //    Relation containing Area and Inner area
+
+        var a = iD.osmNode({ id: 'a', loc: [] });
+        var b = iD.osmNode({ id: 'b', loc: [] });
+        var c = iD.osmNode({ id: 'c', loc: [] });
+        var d = iD.osmNode({ id: 'd', loc: [] });
+        var e = iD.osmNode({ id: 'e', loc: [] });
+        var f = iD.osmNode({ id: 'f', loc: [] });
+        var y = iD.osmNode({ id: 'y', loc: [] });
+        var u = iD.osmNode({ id: 'u', loc: [] });
+        var w = iD.osmNode({ id: 'w', loc: [] });
+        var z = iD.osmNode({ id: 'z', loc: [] });
+        var graph = iD.coreGraph([
+            a, b, c, d, e, f, y, u, w, z,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'e', 'f', 'a'], tags: { area: 'yes' } }),
+            iD.osmWay({ id: 'cutline', nodes: ['c', 'f'] }),
+            iD.osmWay({ id: 'inside', nodes: ['y', 'u', 'w', 'z', 'y'] }),
+            iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
+                { id: 'area', type: 'way' },
+                { id: 'inside', type: 'way' }
+            ]})
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['c', 'd', 'e', 'f', 'c']);
+        expect(graph1.entity('new').nodes).to.eql(['f', 'a', 'b', 'c', 'f']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['c', 'd', 'e', 'f', 'c']);
+        expect(graph2.entity('new').nodes).to.eql(['f', 'a', 'b', 'c', 'f']);
+    });
+
     it('copies given area\'s tags to the new area', function () {
         //
         // Situation:
         //    b ---> c
         //    ^ \    |
-        //    |    \ |
+        //    |    \ v
         //    a <--- d
         //
         //    Area a-b-c-d-a
@@ -552,7 +636,7 @@ describe('iD.actionSplice', function () {
         // Situation:
         //    b ---> c
         //    ^ \    |
-        //    |    \ |
+        //    |    \ v
         //    a <--- d
         //
         //    Area a-b-c-d-a
