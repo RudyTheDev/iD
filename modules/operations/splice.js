@@ -113,10 +113,16 @@ export function operationSplice(context, selectedIDs) {
     };
 
     operation.tooltip = function() {
-        var disable = operation.disabled();
-        return disable ?
-            t.append('operations.splice.' + disable) :
-            t.append('operations.splice.description');
+        var disabled = operation.disabled();
+        if (disabled) {
+            if (_action.disabledInternalReason) {
+                return t.append('operations.splice.' + disabled + '_annotated', { annotation: t(_action.disabledInternalReason()) });
+            } else {
+                return t.append('operations.splice.' + disabled);
+            }
+        } else {
+            return t.append('operations.splice.description');
+        }
     };
 
     operation.annotation = function() {

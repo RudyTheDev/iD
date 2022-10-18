@@ -11,6 +11,8 @@ export function actionSplice(selectedIDs, newWayIds) {
 
     var _resultingWayIds;
 
+    var _disabledInternalReason;
+
 
     var action = function(graph) {
 
@@ -149,6 +151,10 @@ export function actionSplice(selectedIDs, newWayIds) {
         return _resultingWayIds;
     };
 
+    action.disabledInternalReason = function () {
+        return _disabledInternalReason;
+    };
+
     // Returns a two-element array: the cutout line and parent area
     action.findCutLineAndArea = function(graph, selectedIDs) {
         var entity1 = graph.hasEntity(selectedIDs[0]);
@@ -250,7 +256,12 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         var splitDisabled = split.disabled(graph);
 
-        if (splitDisabled) return 'cannot_split_area';
+        if (splitDisabled) {
+            // We make no assumptions when split is available - if it fails, then so do we.
+            // But we can provide the internal reason for the user.
+            _disabledInternalReason = 'operations.split.' + splitDisabled;
+            return 'cannot_split_area';
+        }
 
         return false;
     };
