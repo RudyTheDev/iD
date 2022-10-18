@@ -1,10 +1,6 @@
-// todo: operation #disabled tests since it does a lot of checks
-
 describe('iD.actionSplice', function () {
 
     describe('#disabled', function () {
-
-        // todo: check valid cases to not be disabled
 
         it('disabled when cutline has tags', function () {
             //
