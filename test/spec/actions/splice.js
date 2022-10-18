@@ -520,4 +520,58 @@ describe('iD.actionSplice', function () {
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
+
+    it('copies given area\'s tags to the new area', function () {
+        //
+        // Situation:
+        //    b ---> c
+        //    ^ \    |
+        //    |    \ |
+        //    a <--- d
+        //
+        //    Area a-b-c-d-a
+        //    Cut line b-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var graph = iD.coreGraph([
+            a, b, c, d,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes', interesting: 'very' } }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] })
+        ]);
+
+        graph = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph.entity('area').tags).to.deep.equal({ area: 'yes', interesting: 'very' });
+        expect(graph.entity('new').tags).to.deep.equal({ area: 'yes', interesting: 'very' });
+    });
+
+    it('adds the new area to the given area\'s relation', function () {
+        //
+        // Situation:
+        //    b ---> c
+        //    ^ \    |
+        //    |    \ |
+        //    a <--- d
+        //
+        //    Area a-b-c-d-a
+        //    Cut line b-d
+
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 1] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var graph = iD.coreGraph([
+            a, b, c, d,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes', interesting: 'very' } }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+            iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
+                { id: 'area', type: 'way' }
+            ]})
+        ]);
+
+        graph = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph.entity('rel').members.map(function (m) { return m.id; })).to.have.members(['area', 'new']);
+    });
 });
