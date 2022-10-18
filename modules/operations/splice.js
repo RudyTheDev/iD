@@ -12,6 +12,7 @@ export function operationSplice(context, selectedIDs) {
 
     var _cutlineId;
     var _areaId;
+    var _extent;
 
 
     function getAction() {
@@ -37,10 +38,14 @@ export function operationSplice(context, selectedIDs) {
         // Splicing operation is shown when the user selects something
         // that resembles a spicable setup - a line within an area
 
+        if (selectedIDs.length > 2) {
+            // More than 2 ways would be ambiguous and we don't support "multi-splicing"
+            return false;
+        }
+
+        var graph = context.graph();
+
         if (selectedIDs.length === 2) {
-
-            let graph = context.graph();
-
             // Selected entities must be 2 ways - cut line within an area
 
             let entity1 = graph.entity(selectedIDs[0]);
@@ -71,12 +76,7 @@ export function operationSplice(context, selectedIDs) {
             _cutlineId = ways[0].id;
             _areaId = ways[1].id;
 
-            return true;
-
         } else if (selectedIDs.length === 1) {
-
-            let graph = context.graph();
-
             // See if the selected entity is a way that forms a cut line for an area
 
             let entity = graph.entity(selectedIDs[0]);
@@ -91,12 +91,11 @@ export function operationSplice(context, selectedIDs) {
             _cutlineId = entity.id;
             _areaId = parent.id;
 
-            return true;
-
-        } else {
-            // More than 2 ways would be ambiguous and we don't support "multi-splicing"
-            return false;
         }
+
+        _extent = graph.entity(_cutlineId).extent(graph);
+
+        return true;
     };
 
     operation.relatedEntityIds = function() {
@@ -104,6 +103,9 @@ export function operationSplice(context, selectedIDs) {
     };
 
     operation.disabled = function() {
+
+        if (_extent.percentContainedIn(context.map().extent()) < 0.8) return 'too_large';
+
         var actionDisabled = _action.disabled(context.graph());
         if (actionDisabled) return actionDisabled;
 
@@ -115,8 +117,9 @@ export function operationSplice(context, selectedIDs) {
     operation.tooltip = function() {
         var disabled = operation.disabled();
         if (disabled) {
-            if (_action.disabledInternalReason) {
-                return t.append('operations.splice.' + disabled + '_annotated', { annotation: t(_action.disabledInternalReason()) });
+            let internalReason = _action.disabledInternalReason();
+            if (internalReason) {
+                return t.append('operations.splice.' + disabled + '_annotated', { annotation: t(internalReason) });
             } else {
                 return t.append('operations.splice.' + disabled);
             }

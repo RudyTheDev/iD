@@ -517,7 +517,8 @@ en:
       cannot_split_area: Cannot split the parent area at the connecting points.
       cannot_split_area_annotated: "Cannot split the parent area at the connecting points. {annotation}"
       connected_to_hidden: This can't be spliced because it is connected to a hidden feature.
-      area_member_not_downloaded: This can't be spliced because not all member of the parent area are downloaded.
+      area_member_not_downloaded: This can't be spliced because not all members of the parent area are downloaded.
+      too_large: This can't be spliced because not enough of the line is visible.
     restriction:
       annotation:
         create: Added a turn restriction

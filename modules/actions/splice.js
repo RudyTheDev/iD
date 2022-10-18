@@ -236,7 +236,7 @@ export function actionSplice(selectedIDs, newWayIds) {
 
                     if (relationMembers[i].type !== 'way') continue;
 
-                    let member = graph.hasEntity(relationMembers[i]);
+                    let member = graph.hasEntity(relationMembers[i].id);
                     if (!member) return 'area_member_not_downloaded';
 
                     let memberCoords = member.nodes.map(function(node) { return graph.entity(node).loc; });
