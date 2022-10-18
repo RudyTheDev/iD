@@ -86,8 +86,7 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         function reapplyTags(graph, wayID, originalTags) {
 
-            if (originalTags.length === 0)
-                return; // nothing to copy
+            if (originalTags.length === 0) return; // nothing to copy
 
             var copiedTags = {};
             Object.keys(originalTags).forEach(function(key) { copiedTags[key] = originalTags[key]; });
