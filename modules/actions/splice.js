@@ -230,7 +230,10 @@ export function actionSplice(selectedIDs, newWayIds) {
 
                     if (relationMembers[i].type !== 'way') continue;
 
-                    let memberCoords = graph.entity(relationMembers[i].id).nodes.map(function(node) { return graph.entity(node).loc; });
+                    let member = graph.hasEntity(relationMembers[i]);
+                    if (!member) return 'area_member_not_downloaded';
+
+                    let memberCoords = member.nodes.map(function(node) { return graph.entity(node).loc; });
 
                     if (geoPathHasIntersections(cutlineCoords, memberCoords)) return 'cutline_intersects_inner_members';
                 }
