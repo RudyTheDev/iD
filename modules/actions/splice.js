@@ -84,11 +84,11 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         function reapplyTags(graph, wayID, originalTags) {
 
-            // todo: only if tagged
+            if (originalTags.length === 0)
+                return; // nothing to copy
 
             var copiedTags = {};
             Object.keys(originalTags).forEach(function(key) { copiedTags[key] = originalTags[key]; });
-            // todo: I must be doing this wrong, but I looked but couldn't find a place were iD clones tags
 
             graph = graph.replace(graph.entity(wayID).update({ tags: copiedTags }));
 
@@ -229,8 +229,6 @@ export function actionSplice(selectedIDs, newWayIds) {
                     if (relationMembers[i].id === parentWay.id) continue;
 
                     if (relationMembers[i].type !== 'way') continue;
-
-                    // todo: relation in a relation? does it matter?
 
                     let memberCoords = graph.entity(relationMembers[i].id).nodes.map(function(node) { return graph.entity(node).loc; });
 

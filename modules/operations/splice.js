@@ -104,9 +104,6 @@ export function operationSplice(context, selectedIDs) {
     };
 
     operation.disabled = function() {
-
-        // todo: extent? splicing is awesome for huge area, but you can't even zoom out in osm to splice them, sooo...
-
         var actionDisabled = _action.disabled(context.graph());
         if (actionDisabled) return actionDisabled;
 
@@ -116,18 +113,10 @@ export function operationSplice(context, selectedIDs) {
     };
 
     operation.tooltip = function() {
-        var disabled = operation.disabled();
-        if (disabled) {
-
-            // TODO: REASON
-
-            // if (disabled === 'conflicting_relations') {
-            //     return t.append('operations.merge.conflicting_relations');
-            // }
-
-            return t.append('operations.splice.' + disabled);
-        }
-        return t.append('operations.splice.description');
+        var disable = operation.disabled();
+        return disable ?
+            t.append('operations.splice.' + disable) :
+            t.append('operations.splice.description');
     };
 
     operation.annotation = function() {
