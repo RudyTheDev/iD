@@ -2389,6 +2389,7 @@ en:
         disconnect: "Disconnect selected features"
         extract: "Extract a point from a feature"
         split: "Split features at the selected points"
+        splice: "Split area along the selected line"
         reverse: "Reverse selected features"
         move: "Move selected features"
         follow: "Follow a line or area"

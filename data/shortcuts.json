@@ -276,6 +276,10 @@
             "text": "shortcuts.editing.operations.split"
           },
           {
+            "shortcuts": ["operations.splice.key"],
+            "text": "shortcuts.editing.operations.splice"
+          },
+          {
             "shortcuts": ["operations.reverse.key"],
             "text": "shortcuts.editing.operations.reverse"
           },
