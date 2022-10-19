@@ -4,10 +4,14 @@ import { actionSplit } from './split';
 import { actionDeleteWay } from './delete_way';
 import { osmTagSuggestingArea } from '../osm';
 
-//
-// For testing convenience, accepts an ID to assign to the new way.
-// Normally, this will be undefined and the way will automatically
-// be assigned a new ID.
+/**
+ * Splices an area into two, i.e. divides a closed area way into two such areas along a given removable cut line.
+ * This must be supplied either with a cut line and the area or just the cut line with an unambiguous parent area.
+ *
+ * For testing convenience, accepts an ID to assign to the new way.
+ * Normally, this will be undefined and the way will automatically
+ * be assigned a new ID.
+ */
 export function actionSplice(selectedIDs, newWayIds) {
 
     var _resultingWayIds;
@@ -15,6 +19,9 @@ export function actionSplice(selectedIDs, newWayIds) {
     var _disabledInternalReason;
 
 
+    /**
+     * @param {coreGraph} graph
+     */
     var action = function(graph) {
 
         var cutLineWayID;
@@ -42,6 +49,7 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         var originalTags = way.tags;
 
+        // We have to remove tags for now from the way or the split action will create a multipolygon
         graph = graph.replace(way.update({ tags: [] }));
 
         var terminalNodes = getTerminalNodes(graph, cutLineWayID);
@@ -51,7 +59,7 @@ export function actionSplice(selectedIDs, newWayIds) {
 
         graph = split(graph);
 
-        var createdWayIds = split.getCreatedWayIDs();
+        var createdWayIds = split.getCreatedWayIDs(); // this should only be 1 way
 
         graph = followCutLine(graph, parentWayID, cutLineWayID);
         graph = followCutLine(graph, createdWayIds[0], cutLineWayID);
@@ -66,6 +74,15 @@ export function actionSplice(selectedIDs, newWayIds) {
         return graph;
 
 
+        /**
+         * Closes an open way along the given way,
+         * i.e. appends nodes to the newly-split now-open area from the cut line.
+         * This will choose the correct direction based on the way.
+         * @param {coreGraph} graph
+         * @param {string} wayId
+         * @param {string} followedWayId
+         * @returns {coreGraph}
+         */
         function followCutLine(graph, wayId, followedWayId) {
             // If we have a way 2-3-4-5-6 and we want to follow way 6-8-9-2, we will end up with 2-3-4-5-6-8-9-2
 
@@ -85,9 +102,16 @@ export function actionSplice(selectedIDs, newWayIds) {
         }
 
 
+        /**
+         * Places previously-recorded tags onto a new way
+         * @param {coreGraph} graph
+         * @param {string} wayID
+         * @param originalTags
+         * @returns {coreGraph}
+         */
         function reapplyTags(graph, wayID, originalTags) {
 
-            if (originalTags.length === 0) return; // nothing to copy
+            if (originalTags.length === 0) return graph; // nothing to copy
 
             var copiedTags = {};
             Object.keys(originalTags).forEach(function(key) { copiedTags[key] = originalTags[key]; });
@@ -99,6 +123,12 @@ export function actionSplice(selectedIDs, newWayIds) {
     };
 
 
+    /**
+     * Returns the first and last node for the given way
+     * @param {coreGraph} graph
+     * @param {string} cutLineWayID
+     * @returns {[string, string]}
+     */
     function getTerminalNodes(graph, cutLineWayID) {
 
         var cutLineWay = graph.entity(cutLineWayID);
@@ -110,6 +140,13 @@ export function actionSplice(selectedIDs, newWayIds) {
     }
 
 
+    /**
+     * Attempts to find an area that is potentially splicable by the given cutline,
+     * i.e. connects two non-adjecent nodes of the area.
+     * @param {coreGraph} graph
+     * @param {osmWay} cutline
+     * @returns {osmWay}
+     */
     action.getSplicableAreaBetween = function(graph, cutline) {
 
         let startNode = graph.entity(cutline.nodes[0]);
@@ -171,6 +208,11 @@ export function actionSplice(selectedIDs, newWayIds) {
     };
 
 
+    /**
+     * The way IDs that were created after running the action.
+     * This includes the original area.
+     * @returns {string[]}
+     */
     action.getResultingWayIds = function () {
         return _resultingWayIds;
     };
@@ -179,7 +221,12 @@ export function actionSplice(selectedIDs, newWayIds) {
         return _disabledInternalReason;
     };
 
-    // Returns a two-element array: the cutout line and parent area
+    /**
+     * Decides between the two provided ways which one is the cut line and which the parent area.
+     * @param {coreGraph} graph
+     * @param {string[2]} selectedIDs
+     * @returns {[osmWay, osmWay]}
+     */
     action.tellApartCutLineAndArea = function(graph, selectedIDs) {
         var entity1 = graph.hasEntity(selectedIDs[0]);
         var entity2 = graph.hasEntity(selectedIDs[1]);
