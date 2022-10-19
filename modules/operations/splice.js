@@ -45,7 +45,7 @@ export function operationSplice(context, selectedIDs) {
             return false;
         }
 
-        var graph = context.graph();
+        let graph = context.graph();
 
         if (selectedIDs.length === 2) {
             // Selected entities must be 2 ways - cut line within an area
@@ -62,7 +62,7 @@ export function operationSplice(context, selectedIDs) {
             let way2Closed = entity2.isClosed();
             if (way1Closed && way2Closed || !way1Closed && !way2Closed) return false;
 
-            var ways = _action.tellApartCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+            let ways = _action.tellApartCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
 
             if (!_action.isSplicableArea(graph, ways[1])) return false;
 
@@ -109,7 +109,7 @@ export function operationSplice(context, selectedIDs) {
 
         if (_extent.percentContainedIn(context.map().extent()) < 0.8) return 'too_large';
 
-        var actionDisabled = _action.disabled(context.graph());
+        let actionDisabled = _action.disabled(context.graph());
         if (actionDisabled) return actionDisabled;
 
         if (selectedIDs.some(context.hasHiddenConnections)) return 'connected_to_hidden';
@@ -118,7 +118,7 @@ export function operationSplice(context, selectedIDs) {
     };
 
     operation.tooltip = function() {
-        var disabled = operation.disabled();
+        let disabled = operation.disabled();
         if (disabled) {
             let internalReason = _action.disabledInternalReason();
             if (internalReason) {

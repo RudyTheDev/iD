@@ -16,6 +16,11 @@ export function actionSplice(selectedIDs, newWayIds) {
 
     var _resultingWayIds;
 
+    /**
+     * If our action is disabled because an underlying different action is disabled,
+     * then this is the reason as returned by that action.
+     * For UI purposes, this can be appended as the more exact reason for being unable to splice.
+     */
     var _disabledInternalReason;
 
 
@@ -24,42 +29,23 @@ export function actionSplice(selectedIDs, newWayIds) {
      */
     var action = function(graph) {
 
-        var cutLineWayID;
-        var parentWayID;
+        let [parentWayID, cutLineWayID] = getAreaAndCutlineFromSelected();
 
-        if (selectedIDs.length === 2) {
-            // The user has selected both the cutline and an area
+        let way = graph.entity(parentWayID);
 
-            let ways = action.tellApartCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+        let originalTags = way.tags;
 
-            cutLineWayID = ways[0].id;
-            parentWayID = ways[1].id;
-
-        } else { // length === 1
-            // The user has selected a cutline only that's in an area we can assume
-
-            cutLineWayID = selectedIDs[0];
-
-            let cutline = graph.entity(selectedIDs[0]);
-
-            parentWayID = action.getSplicableAreaBetween(graph, cutline).id;
-        }
-
-        var way = graph.entity(parentWayID);
-
-        var originalTags = way.tags;
-
-        // We have to remove tags for now from the way or the split action will create a multipolygon
+        // We have to remove tags for now from the area or the split action will create a multipolygon if it wasn't already
         graph = graph.replace(way.update({ tags: [] }));
 
-        var terminalNodes = getTerminalNodes(graph, cutLineWayID);
+        let terminalNodes = getTerminalNodes(graph, cutLineWayID);
 
-        var split = actionSplit(terminalNodes, newWayIds);
+        let split = actionSplit(terminalNodes, newWayIds);
         split.limitWays([parentWayID]);
 
         graph = split(graph);
 
-        var createdWayIds = split.getCreatedWayIDs(); // this should only be 1 way
+        let createdWayIds = split.getCreatedWayIDs(); // this should only be 1 way
 
         graph = followCutLine(graph, parentWayID, cutLineWayID);
         graph = followCutLine(graph, createdWayIds[0], cutLineWayID);
@@ -75,6 +61,35 @@ export function actionSplice(selectedIDs, newWayIds) {
 
 
         /**
+         * Used to quickly select the area way and the cut line way from the given/selected entities.
+         * This assumes the selection is a valid unambiguous combination.
+         * @returns {[string, string]}
+         */
+        function getAreaAndCutlineFromSelected() {
+            if (selectedIDs.length === 2) {
+                // The user has selected both the cutline and an area
+
+                let ways = action.tellApartCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+
+                return [
+                    ways[1].id,
+                    ways[0].id
+                ];
+
+            } else { // length === 1
+                // The user has selected a cutline only and it's in an area we can unambiguously find/assume
+
+                let cutline = graph.entity(selectedIDs[0]);
+
+                return [
+                    action.getSplicableAreaBetween(graph, cutline).id,
+                    selectedIDs[0]
+                ];
+            }
+        }
+
+
+        /**
          * Closes an open way along the given way,
          * i.e. appends nodes to the newly-split now-open area from the cut line.
          * This will choose the correct direction based on the way.
@@ -86,10 +101,10 @@ export function actionSplice(selectedIDs, newWayIds) {
         function followCutLine(graph, wayId, followedWayId) {
             // If we have a way 2-3-4-5-6 and we want to follow way 6-8-9-2, we will end up with 2-3-4-5-6-8-9-2
 
-            var way = graph.entity(wayId);
-            var followedWay = graph.entity(followedWayId);
+            let way = graph.entity(wayId);
+            let followedWay = graph.entity(followedWayId);
 
-            var appendableNodes = followedWay.nodes;
+            let appendableNodes = followedWay.nodes;
             if (way.nodes[0] === followedWay.nodes[0]) { // i.e. ways have opposite directions
                 appendableNodes = appendableNodes.reverse();
             }
@@ -103,7 +118,8 @@ export function actionSplice(selectedIDs, newWayIds) {
 
 
         /**
-         * Places previously-recorded tags onto a new way
+         * Copies previously-recorded tags onto a (new) way.
+         * This is a 1:1 copy and assumes all the previous tags apply.
          * @param {coreGraph} graph
          * @param {string} wayID
          * @param originalTags
@@ -113,7 +129,7 @@ export function actionSplice(selectedIDs, newWayIds) {
 
             if (originalTags.length === 0) return graph; // nothing to copy
 
-            var copiedTags = {};
+            let copiedTags = {};
             Object.keys(originalTags).forEach(function(key) { copiedTags[key] = originalTags[key]; });
 
             graph = graph.replace(graph.entity(wayID).update({ tags: copiedTags }));
@@ -124,17 +140,17 @@ export function actionSplice(selectedIDs, newWayIds) {
 
 
     /**
-     * Returns the first and last node for the given way
+     * Returns the first and last node for the given way.
      * @param {coreGraph} graph
      * @param {string} cutLineWayID
      * @returns {[string, string]}
      */
     function getTerminalNodes(graph, cutLineWayID) {
 
-        var cutLineWay = graph.entity(cutLineWayID);
+        let cutLineWay = graph.entity(cutLineWayID);
 
-        var node1 = cutLineWay.nodes[0];
-        var node2 = cutLineWay.nodes[cutLineWay.nodes.length - 1];
+        let node1 = cutLineWay.nodes[0];
+        let node2 = cutLineWay.nodes[cutLineWay.nodes.length - 1];
 
         return [node1, node2];
     }
@@ -142,7 +158,9 @@ export function actionSplice(selectedIDs, newWayIds) {
 
     /**
      * Attempts to find an area that is potentially splicable by the given cutline,
-     * i.e. connects two non-adjecent nodes of the area.
+     * i.e. connects two non-adjacent nodes of the area.
+     * This does not imply that it's allowed to splice this area,
+     * this simply locates a potentially-compatable geometry.
      * @param {coreGraph} graph
      * @param {osmWay} cutline
      * @returns {osmWay}
@@ -228,8 +246,8 @@ export function actionSplice(selectedIDs, newWayIds) {
      * @returns {[osmWay, osmWay]}
      */
     action.tellApartCutLineAndArea = function(graph, selectedIDs) {
-        var entity1 = graph.hasEntity(selectedIDs[0]);
-        var entity2 = graph.hasEntity(selectedIDs[1]);
+        let entity1 = graph.hasEntity(selectedIDs[0]);
+        let entity2 = graph.hasEntity(selectedIDs[1]);
 
         if (entity1.isClosed()) {
             return [entity2, entity1];
@@ -240,8 +258,8 @@ export function actionSplice(selectedIDs, newWayIds) {
 
 
     action.disabled = function(graph) {
-        var cutLineWay;
-        var parentWay;
+        let cutLineWay;
+        let parentWay;
 
         if (selectedIDs.length === 2) {
             // The user has selected both the cutline and an area
@@ -320,12 +338,12 @@ export function actionSplice(selectedIDs, newWayIds) {
         // At this point, our own checks are good to go,
         // but we rely on split action internally, so check that we can actually split
 
-        var terminalNodes = getTerminalNodes(graph, cutLineWay.id);
+        let terminalNodes = getTerminalNodes(graph, cutLineWay.id);
 
-        var split = actionSplit(terminalNodes, newWayIds);
+        let split = actionSplit(terminalNodes, newWayIds);
         split.limitWays([parentWay.id]);
 
-        var splitDisabled = split.disabled(graph);
+        let splitDisabled = split.disabled(graph);
 
         if (splitDisabled) {
             // We make no assumptions when split is available - if it fails, then so do we.
