@@ -16,7 +16,7 @@ describe('iD.actionSplice', function () {
             var a = iD.osmNode({ id: 'a', loc: [0, 0] });
             var b = iD.osmNode({ id: 'b', loc: [0, 1] });
             var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-            var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+            var d = iD.osmNode({ id: 'd', loc: [1, 0] });
             var graph = iD.coreGraph([
                 a, b, c, d,
                 iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
@@ -40,7 +40,7 @@ describe('iD.actionSplice', function () {
             var a = iD.osmNode({ id: 'a', loc: [0, 0] });
             var b = iD.osmNode({ id: 'b', loc: [0, 1] });
             var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-            var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+            var d = iD.osmNode({ id: 'd', loc: [1, 0] });
             var graph = iD.coreGraph([
                 a, b, c, d,
                 iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
@@ -67,7 +67,7 @@ describe('iD.actionSplice', function () {
             var a = iD.osmNode({ id: 'a', loc: [0, 0] });
             var b = iD.osmNode({ id: 'b', loc: [0, 2] });
             var c = iD.osmNode({ id: 'c', loc: [2, 2] });
-            var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+            var d = iD.osmNode({ id: 'd', loc: [2, 0] });
             var x = iD.osmNode({ id: 'x', loc: [1, 1], tags: { interesting: 'yes' } });
             var graph = iD.coreGraph([
                 a, b, c, d, x,
@@ -94,7 +94,7 @@ describe('iD.actionSplice', function () {
             var a = iD.osmNode({ id: 'a', loc: [0, 0] });
             var b = iD.osmNode({ id: 'b', loc: [0, 2] });
             var c = iD.osmNode({ id: 'c', loc: [2, 2] });
-            var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+            var d = iD.osmNode({ id: 'd', loc: [2, 0] });
             var x = iD.osmNode({ id: 'x', loc: [1, 1] });
             var graph = iD.coreGraph([
                 a, b, c, d, x,
@@ -124,7 +124,7 @@ describe('iD.actionSplice', function () {
             var a = iD.osmNode({ id: 'a', loc: [0, 0] });
             var b = iD.osmNode({ id: 'b', loc: [0, 2] });
             var c = iD.osmNode({ id: 'c', loc: [2, 2] });
-            var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+            var d = iD.osmNode({ id: 'd', loc: [2, 0] });
             var x = iD.osmNode({ id: 'x', loc: [1, 1] });
             var y = iD.osmNode({ id: 'y', loc: [1.5, 1.5] });
             var graph = iD.coreGraph([
@@ -157,7 +157,7 @@ describe('iD.actionSplice', function () {
             var b = iD.osmNode({ id: 'b', loc: [0, 4] });
             var c = iD.osmNode({ id: 'c', loc: [2, 4] });
             var x = iD.osmNode({ id: 'x', loc: [2, 2] });
-            var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+            var d = iD.osmNode({ id: 'd', loc: [2, 0] });
             var graph = iD.coreGraph([
                 a, b, c, d, x,
                 iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'x', 'd', 'a'], tags: { area: 'yes' } }),
@@ -186,7 +186,7 @@ describe('iD.actionSplice', function () {
             var a = iD.osmNode({ id: 'a', loc: [0, 0] });
             var b = iD.osmNode({ id: 'b', loc: [0, 1] });
             var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-            var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+            var d = iD.osmNode({ id: 'd', loc: [1, 0] });
             var x = iD.osmNode({ id: 'x', loc: [2, 2] });
             var graph = iD.coreGraph([
                 a, b, c, d, x,
@@ -254,7 +254,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var graph = iD.coreGraph([
             a, b, c, d,
             iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
@@ -287,7 +287,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 2] });
         var c = iD.osmNode({ id: 'c', loc: [2, 2] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 2] });
+        var d = iD.osmNode({ id: 'd', loc: [2, 0] });
         var x = iD.osmNode({ id: 'x', loc: [1, 1] });
         var graph = iD.coreGraph([
             a, b, c, d, x,
@@ -321,7 +321,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var y = iD.osmNode({ id: 'y', loc: [2, 0] });
         var graph = iD.coreGraph([
             a, b, c, d, y,
@@ -358,7 +358,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var y = iD.osmNode({ id: 'y', loc: [2, 0] });
         var u = iD.osmNode({ id: 'u', loc: [1, -1] });
         var graph = iD.coreGraph([
@@ -394,7 +394,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var y = iD.osmNode({ id: 'y', loc: [2, 0] });
         var u = iD.osmNode({ id: 'u', loc: [2, 1] });
         var graph = iD.coreGraph([
@@ -432,7 +432,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var y = iD.osmNode({ id: 'y', loc: [2, 0] });
         var u = iD.osmNode({ id: 'u', loc: [2, 2] });
         var w = iD.osmNode({ id: 'w', loc: [0, 2] });
@@ -471,7 +471,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var y = iD.osmNode({ id: 'y', loc: [2, 0] });
         var u = iD.osmNode({ id: 'u', loc: [2, 2] });
         var w = iD.osmNode({ id: 'w', loc: [0, 2] });
@@ -503,7 +503,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1], tags: { interesting: 'yes' } });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0], tags: { interesting: 'yes' } });
         var graph = iD.coreGraph([
             a, b, c, d,
             iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
@@ -536,7 +536,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var graph = iD.coreGraph([
             a, b, c, d,
             iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
@@ -573,16 +573,16 @@ describe('iD.actionSplice', function () {
         //    Inner area y-u-w-z-y
         //    Relation containing Area and Inner area
 
-        var a = iD.osmNode({ id: 'a', loc: [] });
-        var b = iD.osmNode({ id: 'b', loc: [] });
-        var c = iD.osmNode({ id: 'c', loc: [] });
-        var d = iD.osmNode({ id: 'd', loc: [] });
-        var e = iD.osmNode({ id: 'e', loc: [] });
-        var f = iD.osmNode({ id: 'f', loc: [] });
-        var y = iD.osmNode({ id: 'y', loc: [] });
-        var u = iD.osmNode({ id: 'u', loc: [] });
-        var w = iD.osmNode({ id: 'w', loc: [] });
-        var z = iD.osmNode({ id: 'z', loc: [] });
+        var a = iD.osmNode({ id: 'a', loc: [0, 0] });
+        var b = iD.osmNode({ id: 'b', loc: [0, 3] });
+        var c = iD.osmNode({ id: 'c', loc: [1, 3] });
+        var d = iD.osmNode({ id: 'd', loc: [3, 3] });
+        var e = iD.osmNode({ id: 'e', loc: [3, 0] });
+        var f = iD.osmNode({ id: 'f', loc: [1, 0] });
+        var y = iD.osmNode({ id: 'y', loc: [2, 1] });
+        var u = iD.osmNode({ id: 'u', loc: [2, 2] });
+        var w = iD.osmNode({ id: 'w', loc: [3, 2] });
+        var z = iD.osmNode({ id: 'z', loc: [3, 1] });
         var graph = iD.coreGraph([
             a, b, c, d, e, f, y, u, w, z,
             iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'e', 'f', 'a'], tags: { area: 'yes' } }),
@@ -619,7 +619,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var graph = iD.coreGraph([
             a, b, c, d,
             iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes', interesting: 'very' } }),
@@ -645,7 +645,7 @@ describe('iD.actionSplice', function () {
         var a = iD.osmNode({ id: 'a', loc: [0, 0] });
         var b = iD.osmNode({ id: 'b', loc: [0, 1] });
         var c = iD.osmNode({ id: 'c', loc: [1, 1] });
-        var d = iD.osmNode({ id: 'd', loc: [0, 1] });
+        var d = iD.osmNode({ id: 'd', loc: [1, 0] });
         var graph = iD.coreGraph([
             a, b, c, d,
             iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes', interesting: 'very' } }),

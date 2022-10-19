@@ -2,6 +2,7 @@ import { geoPathHasIntersections, geoPointInPolygon } from '../geo';
 
 import { actionSplit } from './split';
 import { actionDeleteWay } from './delete_way';
+import { osmTagSuggestingArea } from '../osm';
 
 //
 // For testing convenience, accepts an ID to assign to the new way.
@@ -22,7 +23,7 @@ export function actionSplice(selectedIDs, newWayIds) {
         if (selectedIDs.length === 2) {
             // The user has selected both the cutline and an area
 
-            let ways = action.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+            let ways = action.tellApartCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
 
             cutLineWayID = ways[0].id;
             parentWayID = ways[1].id;
@@ -130,7 +131,7 @@ export function actionSplice(selectedIDs, newWayIds) {
 
             if (!startParents[i].isClosed()) continue; // ignoring open ways
 
-            if (!startParents[i].isArea()) continue; // ignoring closed ways that aren't areas
+            if (!this.isSplicableArea(graph, startParents[i])) continue; // ignoring closed ways that aren't areas
 
             if (!endParents.includes(startParents[i])) continue;
 
@@ -147,6 +148,28 @@ export function actionSplice(selectedIDs, newWayIds) {
         return parent;
     };
 
+    /**
+     * Returns whether the given way can be considered an "area" from user's perspective,
+     * i.e. something that should be slicable.
+     * @param {coreGraph} graph
+     * @param {osmWay} way
+     * @returns {boolean}
+     */
+    action.isSplicableArea = function(graph, way) {
+        if (way.isArea()) return true;
+
+        let parentRelations = graph.parentRelations(way);
+        for (let i = 0; i < parentRelations.length; i++) {
+            if (parentRelations[i].isMultipolygon()) {
+                if (osmTagSuggestingArea(parentRelations[i].tags)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
+
 
     action.getResultingWayIds = function () {
         return _resultingWayIds;
@@ -157,7 +180,7 @@ export function actionSplice(selectedIDs, newWayIds) {
     };
 
     // Returns a two-element array: the cutout line and parent area
-    action.findCutLineAndArea = function(graph, selectedIDs) {
+    action.tellApartCutLineAndArea = function(graph, selectedIDs) {
         var entity1 = graph.hasEntity(selectedIDs[0]);
         var entity2 = graph.hasEntity(selectedIDs[1]);
 
@@ -176,7 +199,7 @@ export function actionSplice(selectedIDs, newWayIds) {
         if (selectedIDs.length === 2) {
             // The user has selected both the cutline and an area
 
-            let ways = action.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
+            let ways = action.tellApartCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
 
             cutLineWay = ways[0];
             parentWay = ways[1];

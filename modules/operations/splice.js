@@ -1,9 +1,9 @@
-import {t} from '../core/localizer';
+import { t } from '../core/localizer';
 
-import {actionSplice} from '../actions/splice';
+import { actionSplice } from '../actions/splice';
 
-import {behaviorOperation} from '../behavior/operation';
-import {modeSelect} from '../modes/select';
+import { behaviorOperation } from '../behavior/operation';
+import { modeSelect } from '../modes/select';
 
 
 export function operationSplice(context, selectedIDs) {
@@ -36,7 +36,7 @@ export function operationSplice(context, selectedIDs) {
     operation.available = function() {
 
         // Splicing operation is shown when the user selects something
-        // that resembles a spicable setup - a line within an area
+        // that resembles a splicable setup - a line within an area
 
         if (selectedIDs.length === 0) return false;
 
@@ -62,10 +62,9 @@ export function operationSplice(context, selectedIDs) {
             let way2Closed = entity2.isClosed();
             if (way1Closed && way2Closed || !way1Closed && !way2Closed) return false;
 
+            var ways = _action.tellApartCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
 
-            var ways = _action.findCutLineAndArea(graph, selectedIDs); // 0 is cut line and 1 is parent area
-
-            if (!ways[1].isArea()) return false;
+            if (!_action.isSplicableArea(graph, ways[1])) return false;
 
             let startNode = ways[0].nodes[0];
             let endNode = ways[0].nodes[ways[0].nodes.length - 1];
