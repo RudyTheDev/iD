@@ -114,7 +114,7 @@ export function actionSplit(nodeIds, newWayIds) {
                 // Only this one node was given for this way, so choose a (new) second one
                 idxB = choosePartnerNodeForAreaSplit(nodes, idxA, graph);
             } else {
-                // More than one node was given for this way, so use one of them, i.e. only split at the nodes
+                // More than one node was given for this way, so use one of them, i.e. only split at the nodes (#9335)
                 idxB = nodes.indexOf(otherSplitNode);
             }
 
@@ -270,7 +270,7 @@ export function actionSplit(nodeIds, newWayIds) {
         _createdWayIDs.push(wayB.id);
 
         // If the exact ways to be split were given (selected), then the newly-created way should also be a part of it
-        // (or further nodes that are on this new way will not split it further)
+        // (or further nodes that are on this new way will not split it further (#9335))
         if (_wayIDs) _wayIDs.push(wayB.id);
 
         return graph;
