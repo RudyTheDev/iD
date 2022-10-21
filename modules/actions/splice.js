@@ -214,10 +214,13 @@ export function actionSplice(selectedIDs, newWayIds) {
         if (way.isArea()) return true;
 
         let parentRelations = graph.parentRelations(way);
+
         for (let i = 0; i < parentRelations.length; i++) {
             if (parentRelations[i].isMultipolygon()) {
-                if (osmTagSuggestingArea(parentRelations[i].tags)) {
-                    return true;
+                if (parentRelations[i].memberById(way.id).role === 'outer') {
+                    if (osmTagSuggestingArea(parentRelations[i].tags)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -321,7 +324,12 @@ export function actionSplice(selectedIDs, newWayIds) {
 
                 for (let i = 0; i < relationMembers.length; i++) {
 
-                    if (relationMembers[i].id === parentWay.id) continue;
+                    if (relationMembers[i].id === parentWay.id) {
+
+                        if (relationMembers[i].role !== 'outer') return 'area_not_outer_relation_member';
+
+                        continue;
+                    }
 
                     if (relationMembers[i].type !== 'way') continue;
 

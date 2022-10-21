@@ -113,7 +113,7 @@ describe('iD.operationSplice', function () {
         });
     });
 
-    describe('valid geometry - multipolygon', function () {
+    describe('valid geometry - separated multipolygon', function () {
 
         beforeEach(function () {
             //
@@ -126,7 +126,7 @@ describe('iD.operationSplice', function () {
             //    Area a-b-c-d-a
             //    Cut line b-d
             //    Another area u-y-w-z-u
-            //    Multipolyogn Relation wtih members Area and Another area
+            //    Multipolygon Relation with members Area and Another area
 
             var a = iD.osmNode({ id: 'a', loc: [0, 0] });
             var b = iD.osmNode({ id: 'b', loc: [0, 1] });
@@ -143,8 +143,8 @@ describe('iD.operationSplice', function () {
                 iD.osmWay({ id: 'another', nodes: ['y', 'w', 'u', 'z', 'y'] }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
                 iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon', area: 'yes' }, members: [
-                    { id: 'area', type: 'way' },
-                    { id: 'another', type: 'way' }
+                    { id: 'area', type: 'way', role: 'outer' },
+                    { id: 'another', type: 'way', role: 'outer' }
                 ]})
             ]);
         });
