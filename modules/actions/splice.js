@@ -307,8 +307,8 @@ export function actionSplice(selectedIDs, newWayIds) {
             if (!geoPointInPolygon(node.loc, parentPolygonCoords)) return 'cutline_outside_area';
         }
 
-        // Check that the cut won't intersect other members of the parent's relation,
-        // for example, an inner hole of an area.
+
+        let isAreaItself = parentWay.isArea();
 
         let parentRelations = graph.parentRelations(parentWay);
 
@@ -326,7 +326,11 @@ export function actionSplice(selectedIDs, newWayIds) {
 
                     if (relationMembers[i].id === parentWay.id) {
 
-                        if (relationMembers[i].role !== 'outer') return 'area_not_outer_relation_member';
+                        if (isAreaItself && relationMembers[i].role !== 'inner') return 'area_not_outer_relation_member';
+                        // Note that this would produce touching inner rings
+                        // (https://wiki.openstreetmap.org/wiki/Relation:multipolygon#Touching_inner_rings)
+
+                        if (!isAreaItself && relationMembers[i].role !== 'outer') return 'area_not_outer_relation_member';
 
                         continue;
                     }

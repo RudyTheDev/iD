@@ -237,7 +237,7 @@ describe('iD.actionSplice', function () {
             expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_intersects_inner_members');
         });
 
-        it('disabled when cutline is on a non-outer multipolygon way', function () {
+        it('disabled when cutline is on a inner multipolygon way that is not an area', function () {
             //
             // Situation:
             //    u -------------- w
@@ -264,7 +264,7 @@ describe('iD.actionSplice', function () {
             var z = iD.osmNode({ id: 'z', loc: [3, 0] });
             var graph = iD.coreGraph([
                 a, b, c, d, y, u, w, z,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
                 iD.osmWay({ id: 'outside', nodes: ['y', 'u', 'w', 'z', 'y'] }),
                 iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
@@ -642,6 +642,53 @@ describe('iD.actionSplice', function () {
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['c', 'd', 'e', 'f', 'c']);
         expect(graph2.entity('new').nodes).to.eql(['f', 'a', 'b', 'c', 'f']);
+    });
+
+    it('splice when cutline is on an area that is an inner multipolygon member', function () {
+        //
+        // Situation:
+        //    u -------------- w
+        //    |                |
+        //    |    b ---> c    |
+        //    |    ^ \    |    |
+        //    |    |    \ v    |
+        //    |    a <--- d    |
+        //    |                |
+        //    y -------------- z
+        //
+        //    Area a-b-c-d-a
+        //    Cut line b-d
+        //    Outside area y-u-w-z-y
+        //    Relation containing Area and Outside area
+
+        var a = iD.osmNode({ id: 'a', loc: [1, 1] });
+        var b = iD.osmNode({ id: 'b', loc: [1, 2] });
+        var c = iD.osmNode({ id: 'c', loc: [2, 2] });
+        var d = iD.osmNode({ id: 'd', loc: [2, 1] });
+        var y = iD.osmNode({ id: 'y', loc: [0, 0] });
+        var u = iD.osmNode({ id: 'u', loc: [0, 3] });
+        var w = iD.osmNode({ id: 'w', loc: [3, 3] });
+        var z = iD.osmNode({ id: 'z', loc: [3, 0] });
+        var graph = iD.coreGraph([
+            a, b, c, d, y, u, w, z,
+            iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
+            iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
+            iD.osmWay({ id: 'outside', nodes: ['y', 'u', 'w', 'z', 'y'] }),
+            iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
+                    { id: 'area', type: 'way', role: 'inner' },
+                    { id: 'outside', type: 'way', role: 'outer' }
+                ]})
+        ]);
+
+        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        expect(graph1.hasEntity('cutline')).to.be.undefined;
+        expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
+
+        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        expect(graph2.hasEntity('cutline')).to.be.undefined;
+        expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
+        expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
     it('copies given area\'s tags to the new area', function () {
