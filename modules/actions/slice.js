@@ -5,21 +5,21 @@ import { actionDeleteWay } from './delete_way';
 import { osmTagSuggestingArea } from '../osm';
 
 /**
- * Splices an area into two, i.e. divides a closed area way into two such areas along a given removable cut line.
+ * Slices an area into two, i.e. divides a closed area way into two such areas along a given removable cut line.
  * This must be supplied either with a cut line and the area or just the cut line with an unambiguous parent area.
  *
  * For testing convenience, accepts an ID to assign to the new way.
  * Normally, this will be undefined and the way will automatically
  * be assigned a new ID.
  */
-export function actionSplice(selectedIDs, newWayIds) {
+export function actionSlice(selectedIDs, newWayIds) {
 
     var _resultingWayIds;
 
     /**
      * If our action is disabled because an underlying different action is disabled,
      * then this is the reason as returned by that action.
-     * For UI purposes, this can be appended as the more exact reason for being unable to splice.
+     * For UI purposes, this can be appended as the more exact reason for being unable to slice.
      */
     var _disabledInternalReason;
 
@@ -159,7 +159,7 @@ export function actionSplice(selectedIDs, newWayIds) {
     /**
      * Attempts to find an area that is potentially splicable by the given cutline,
      * i.e. connects two non-adjacent nodes of the area.
-     * This does not imply that it's allowed to splice this area,
+     * This does not imply that it's allowed to slice this area,
      * this simply locates a potentially-compatable geometry.
      * @param {coreGraph} graph
      * @param {osmWay} cutline
@@ -176,7 +176,7 @@ export function actionSplice(selectedIDs, newWayIds) {
         let endParents = graph.parentWays(endNode);
         if (endParents.length === 1) return null; // just the cutline
 
-        // Find a (single) area that the cutline could unambiguously splice
+        // Find a (single) area that the cutline could unambiguously slice
 
         let parent = null;
 

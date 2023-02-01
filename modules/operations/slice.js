@@ -1,12 +1,12 @@
 import { t } from '../core/localizer';
 
-import { actionSplice } from '../actions/splice';
+import { actionSlice } from '../actions/slice';
 
 import { behaviorOperation } from '../behavior/operation';
 import { modeSelect } from '../modes/select';
 
 
-export function operationSplice(context, selectedIDs) {
+export function operationSlice(context, selectedIDs) {
 
     var _action = getAction();
 
@@ -16,7 +16,7 @@ export function operationSplice(context, selectedIDs) {
 
 
     function getAction() {
-        return actionSplice(selectedIDs);
+        return actionSlice(selectedIDs);
     }
 
 
@@ -122,26 +122,26 @@ export function operationSplice(context, selectedIDs) {
         if (disabled) {
             let internalReason = _action.disabledInternalReason();
             if (internalReason) {
-                return t.append('operations.splice.' + disabled + '_annotated', { annotation: t(internalReason) });
+                return t.append('operations.slice.' + disabled + '_annotated', { annotation: t(internalReason) });
             } else {
-                return t.append('operations.splice.' + disabled);
+                return t.append('operations.slice.' + disabled);
             }
         } else {
-            return t.append('operations.splice.description');
+            return t.append('operations.slice.description');
         }
     };
 
     operation.annotation = function() {
-        return t('operations.splice.annotation', { n: selectedIDs.length });
+        return t('operations.slice.annotation', { n: selectedIDs.length });
     };
 
-    operation.id = 'splice';
-    operation.keys = [t('operations.splice.key')];
-    operation.title = t.append('operations.splice.title');
+    operation.id = 'slice';
+    operation.keys = [t('operations.slice.key')];
+    operation.title = t.append('operations.slice.title');
     operation.behavior = behaviorOperation(context).which(operation);
 
     operation.icon = function() {
-        return '#iD-operation-splice';
+        return '#iD-operation-slice';
     };
 
     return operation;

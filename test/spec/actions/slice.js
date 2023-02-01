@@ -1,4 +1,4 @@
-describe('iD.actionSplice', function () {
+describe('iD.actionSlice', function () {
 
     describe('#disabled', function () {
 
@@ -23,7 +23,7 @@ describe('iD.actionSplice', function () {
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'd'], tags: { interesting: 'yes' } })
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_tagged');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('cutline_tagged');
         });
 
         it('disabled when cutline is in a relation', function () {
@@ -48,7 +48,7 @@ describe('iD.actionSplice', function () {
                 iD.osmRelation({ id: 'relation', members: [ { id: 'cutline', type: 'way' } ]})
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_in_relation');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('cutline_in_relation');
         });
 
         it('disabled when cutline\'s inner node has tags', function () {
@@ -75,7 +75,7 @@ describe('iD.actionSplice', function () {
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_nodes_tagged');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('cutline_nodes_tagged');
         });
 
         it('disabled when cutline\'s inner node is in a relation', function () {
@@ -103,7 +103,7 @@ describe('iD.actionSplice', function () {
                 iD.osmRelation({ id: 'relation', members: [ { id: 'x', type: 'way' } ]})
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_nodes_in_relation');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('cutline_nodes_in_relation');
         });
 
         it('disabled when cutline\'s inner node connects to other ways', function () {
@@ -134,7 +134,7 @@ describe('iD.actionSplice', function () {
                 iD.osmWay({ id: 'other', nodes: ['x', 'y'] })
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_connected_to_other');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('cutline_connected_to_other');
         });
 
         it('disabled when cutline\'s inner node connect to parent way', function () {
@@ -164,7 +164,7 @@ describe('iD.actionSplice', function () {
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'a'] })
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_multiple_connection');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('cutline_multiple_connection');
         });
 
         it('disabled when cutline\'s inner node is outside the parent way', function () {
@@ -194,7 +194,7 @@ describe('iD.actionSplice', function () {
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_outside_area');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('cutline_outside_area');
         });
 
         it('disabled when cutline intersects with another way in parent way\'s multipolygon relation', function () {
@@ -234,7 +234,7 @@ describe('iD.actionSplice', function () {
                 ]})
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('cutline_intersects_inner_members');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('cutline_intersects_inner_members');
         });
 
         it('disabled when cutline is on a inner multipolygon way that is not an area', function () {
@@ -273,13 +273,13 @@ describe('iD.actionSplice', function () {
                 ]})
             ]);
 
-            expect(iD.actionSplice(['area', 'cutline']).disabled(graph)).to.equal('area_not_outer_relation_member');
+            expect(iD.actionSlice(['area', 'cutline']).disabled(graph)).to.equal('area_not_outer_relation_member');
         });
 
     });
 
 
-    it('splices a square', function () {
+    it('slices a square', function () {
         //
         // Situation:
         //    b ---> c
@@ -300,18 +300,18 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] })
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
-    it('splices with an extra node', function () {
+    it('slices with an extra node', function () {
         //
         // Situation:
         //    b ------> c
@@ -334,18 +334,18 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'cutline', nodes: ['b', 'x', 'd'] })
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'x', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'x', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'x', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'x', 'b']);
     });
 
-    it('splices when another way terminates at node', function () {
+    it('slices when another way terminates at node', function () {
         //
         // Situation:
         //    b ---> c
@@ -369,18 +369,18 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'Y', nodes: ['d', 'y'] })
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
-    it('splices when another way passes through a node', function () {
+    it('slices when another way passes through a node', function () {
         //
         // Situation:
         //    b ---> c
@@ -407,18 +407,18 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'Y', nodes: ['u', 'd', 'y'] })
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
-    it('splices when another area terminates at node', function () {
+    it('slices when another area terminates at node', function () {
         //
         // Situation:
         //    b ---> c      u
@@ -443,18 +443,18 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'Y', nodes: ['d', 'y', 'u', 'd'] })
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
-    it('splices when another way connects to both nodes', function () {
+    it('slices when another way connects to both nodes', function () {
         //
         // Situation:
         //    w ----------- u
@@ -482,18 +482,18 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'Y', nodes: ['d', 'y', 'u', 'w', 'b'] })
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
-    it('splices explicitly when another area connects to both nodes', function () {
+    it('slices explicitly when another area connects to both nodes', function () {
         //
         // Situation:
         //    w ----------- u
@@ -521,13 +521,13 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'Y', nodes: ['a', 'b', 'w', 'u', 'y', 'd', 'a'] })
         ]);
 
-        graph = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        graph = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph.hasEntity('cutline')).to.be.undefined;
         expect(graph.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
-    it('splices when a cutline\'s terminal node has tags', function () {
+    it('slices when a cutline\'s terminal node has tags', function () {
         //
         // Situation:
         //    b ---> c
@@ -549,18 +549,18 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] })
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
-    it('splices an area in a relation', function () {
+    it('slices an area in a relation', function () {
         //
         // Situation:
         //    b ---> c
@@ -585,18 +585,18 @@ describe('iD.actionSplice', function () {
             ]})
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
     });
 
-    it('splice when cutline doesn\'t intersect with another way in parent way\'s multipolygon relation', function () {
+    it('slice when cutline doesn\'t intersect with another way in parent way\'s multipolygon relation', function () {
         //
         // Situation:
         //    b -- c --------> d
@@ -633,18 +633,18 @@ describe('iD.actionSplice', function () {
             ]})
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['c', 'd', 'e', 'f', 'c']);
         expect(graph1.entity('new').nodes).to.eql(['f', 'a', 'b', 'c', 'f']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['c', 'd', 'e', 'f', 'c']);
         expect(graph2.entity('new').nodes).to.eql(['f', 'a', 'b', 'c', 'f']);
     });
 
-    it('splice when cutline is on an area that is an inner multipolygon member', function () {
+    it('slice when cutline is on an area that is an inner multipolygon member', function () {
         //
         // Situation:
         //    u -------------- w
@@ -680,12 +680,12 @@ describe('iD.actionSplice', function () {
                 ]})
         ]);
 
-        var graph1 = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        var graph1 = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph1.hasEntity('cutline')).to.be.undefined;
         expect(graph1.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph1.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
 
-        var graph2 = iD.actionSplice(['cutline'], ['new'])(graph);
+        var graph2 = iD.actionSlice(['cutline'], ['new'])(graph);
         expect(graph2.hasEntity('cutline')).to.be.undefined;
         expect(graph2.entity('area').nodes).to.eql(['d', 'a', 'b', 'd']);
         expect(graph2.entity('new').nodes).to.eql(['b', 'c', 'd', 'b']);
@@ -712,7 +712,7 @@ describe('iD.actionSplice', function () {
             iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] })
         ]);
 
-        graph = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        graph = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph.entity('area').tags).to.deep.equal({ area: 'yes', interesting: 'very' });
         expect(graph.entity('new').tags).to.deep.equal({ area: 'yes', interesting: 'very' });
     });
@@ -741,7 +741,7 @@ describe('iD.actionSplice', function () {
             ]})
         ]);
 
-        graph = iD.actionSplice(['area', 'cutline'], ['new'])(graph);
+        graph = iD.actionSlice(['area', 'cutline'], ['new'])(graph);
         expect(graph.entity('rel').members.map(function (m) { return m.id; })).to.have.members(['area', 'new']);
         // todo: is the new one role:outer too?
     });
