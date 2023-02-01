@@ -225,10 +225,10 @@ describe('iD.actionSlice', function () {
             var z = iD.osmNode({ id: 'z', loc: [4, 2] });
             var graph = iD.coreGraph([
                 a, b, c, d, y, u, w, z,
-                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'], tags: { area: 'yes' } }),
+                iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
                 iD.osmWay({ id: 'inside', nodes: ['y', 'u', 'w', 'z', 'y'] }),
-                iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
+                iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon', area: 'yes' }, members: [
                     { id: 'area', type: 'way', role: 'outer' },
                     { id: 'inside', type: 'way', role: 'inner' }
                 ]})
@@ -267,7 +267,7 @@ describe('iD.actionSlice', function () {
                 iD.osmWay({ id: 'area', nodes: ['a', 'b', 'c', 'd', 'a'] }),
                 iD.osmWay({ id: 'cutline', nodes: ['b', 'd'] }),
                 iD.osmWay({ id: 'outside', nodes: ['y', 'u', 'w', 'z', 'y'] }),
-                iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon' }, members: [
+                iD.osmRelation({ id: 'rel', tags: { type: 'multipolygon', area: 'yes' }, members: [
                     { id: 'area', type: 'way', role: 'inner' },
                     { id: 'outside', type: 'way', role: 'outer' }
                 ]})
